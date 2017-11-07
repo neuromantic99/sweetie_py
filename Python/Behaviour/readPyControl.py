@@ -45,8 +45,11 @@ class Session():
         
         # Had to change import encoding to utf-8 to satisfy my console 
         with open(file_path, 'r', encoding = 'utf-8') as f:
-            
+                  
             all_lines = [line.strip() for line in f.readlines() if line.strip()]
+
+            
+            
             
         # utf-8 encoding generates weird string at start of document which needs to be removed
       
@@ -57,9 +60,7 @@ class Session():
         
 
         info_lines = [line[2:] for line in all_lines if line[0]=='I']
-        
-
-        
+    
 
         self.experiment_name = next(line for line in info_lines if 'Experiment name' in line).split(' : ')[1]
         self.task_name       = next(line for line in info_lines if 'Task name'       in line).split(' : ')[1]

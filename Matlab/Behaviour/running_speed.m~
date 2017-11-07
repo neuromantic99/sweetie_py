@@ -6,26 +6,20 @@ function [speed, mid_time_bin] = running_speed(behavioural_data)
 % mariangela 2017
 % edit JR 2017
 
-while 1
+while isRunning = 1
 
 running_forward = behavioural_data.running_forward;
-
-if isempty(running_forward)
-    speed = 0;
-    mid_time_bin = 0;
-    break
-end 
 
 running_forward = reshape(running_forward,1, numel(running_forward));
 
 running_forward = running_forward/1000; %turn data from ms to s
 
+
 try
-end_of_session = ceil(running_forward(end)); %duration of session in s
-catch
-    keyboard
-end
-     
+    end_of_session = ceil(running_forward(end)); %duration of session in s
+
+    
+    
 time_bins= 10; %duration of time bins in s
 radius_wheel=12; %radius of the wheel in cm
 
@@ -44,8 +38,6 @@ end
 angular_speed_deg=(forwards_count*3.6)/time_bins; % speed is calculated here as degrees every sec
 angular_speed_rad=angular_speed_deg*(2*pi)/360; %radians per second
 speed=angular_speed_rad*radius_wheel; %speed (cm/s)
-
-break
 
 end
 end

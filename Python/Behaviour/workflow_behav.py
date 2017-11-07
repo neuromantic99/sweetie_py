@@ -13,17 +13,27 @@ to a mouse and an individual matlab structure for each behavioural session
 
 '''
 
-fPath = '/home/jamesrowland/Documents/RawBehaviour/2p_behaviour/2017-10-18-hf_2p_whiskerstim_nowater'
+fPath = '/home/jamesrowland/Documents/RawBehaviour/'
 outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/'
 
 
+def initialise(fPath):
+    txtFiles = getTxtFiles(fPath)
+
+    for txtFile in txtFiles:
+        try:
+            runWorkflow(txtFile, outPath)
+        except (StopIteration, UnicodeDecodeError):
+            print('blank txt files in directory')
+            continue
 
 def runWorkflow(txtFile, outPath):
 
     #call Tom's behaviour module    
     
     my_session = pc.Session(txtFile, False)
-  
+    
+    
 
     # get the meta data from the header of the txt file
     [ID, date, sessionType, go_pos] = getMetaData(my_session)
@@ -55,9 +65,19 @@ def runWorkflow(txtFile, outPath):
             training = getTraining(my_session)
             discrim = getDiscrimination(my_session, go_pos)
             dictOut = {**basicInfo, **training, **discrim}
+            
+            
+    # add the metadata to the dictionary
+    dictOut['ID'] = ID
+    dictOut['date'] = date
+    dictOut['sessionType'] = sessionType
 
-        
-        
+    #sometimes the mouse doesnt run at all which will return None value
+    #in the dictionary, scipy cannot make this into a mat, so replace it
+    #with a suitable string
+    for key, value in dictOut.items():
+         if value is None:
+             dictOut[key] = 'No Values Found'
       
     saveMatStruct(dictOut, outPath, ID, sessionType, date)
         
@@ -76,7 +96,10 @@ def getTxtFiles(fPath):
 
 def getMetaData(my_session):
     #get the ID of the mouse 
-    ID = my_session.subject_ID
+    ID = my_session.subject_ID.split('_')[0]
+    
+    
+    
               
     # get the date that the session was carried out and use in file name
     date = my_session.datetime_string.split()[0]
@@ -95,7 +118,9 @@ def getMetaData(my_session):
             sessionType = 'imaging_stimulation'
         elif 'trained_water' in name:
             sessionType = 'imaging_discrimination'
-            go_pos = getGoPos(my_session)
+            
+            # leaving out the go-pos for now, check later
+            #go_pos = getGoPos(my_session)
         else:
             raise ValueError('unknown imaging behaviour')
         
@@ -131,12 +156,10 @@ def getGoPos(my_session):
            elif 'is backward' in split1:
                go_pos  = 0
            else:
-               raise ValueError ('failed to find go position value in file %s' %(my_session.subject_ID))
+               raise ValueError ('failed to find go position value in file %s' %(my_session.file_name))
    
     if foundGo == False:
-        print('%s' %my_session.subject_ID)
-        print('%s' %my_session.datetime_string)
-        raise ValueError ('failed to find GO position in file %s' % my_session.subject_ID)
+        raise ValueError ('failed to find GO position in file %s' % my_session.file_name)
        
     return go_pos
     
@@ -153,7 +176,7 @@ def searchPrintLines(my_session, I):
     
     l = [line.split()[0] for line in my_session.print_lines if line.split()[1] == I]
     
-    return l
+    return [float(val) for val in l]
         
     
 def getBasicInfo(my_session):
@@ -161,8 +184,8 @@ def getBasicInfo(my_session):
     basicInfo = {}
     
     basicInfo['water_delivered'] = searchPrintLines(my_session, 'waterON')   
-    basicInfo['running_forward'] =  my_session.times['going_forward']
-    basicInfo['licks'] =  my_session.times['lick_event']    
+    basicInfo['running_forward'] =  my_session.times.get('going_forward')
+    basicInfo['licks'] =  my_session.times.get('lick_event')    
    
     return basicInfo
 
@@ -206,25 +229,23 @@ def getImagingInfo(my_session):
     '''
     
     imInfo = {}
-    imInfo['running_forward'] =  my_session.times['running mouse']
-    imInfo['running_backward'] = my_session.times['moonwalking mouse']
     
+    #get the area, found after the underscore in the ID
+    name = my_session.subject_ID
+    if 'area' in name:
+        imInfo['area'] = my_session.subject_ID.split('_')[1]
+    else:
+        pass
+    
+    imInfo['licks'] =  searchPrintLines(my_session, 'lick')
+    imInfo['water_delivered'] = searchPrintLines(my_session, 'waterON') 
+    imInfo['running_forward'] =  my_session.times.get('running mouse')
+    imInfo['running_backward'] = my_session.times.get('moonwalking mouse')
+
     #couldnt use 'searchPrintLines' for this because of the conflicting for 'going'
-    imInfo['motor_start'] = [line.split()[0] for line in my_session.print_lines if 'going forward' in line]
+    imInfo['motor_start'] = [float(line.split()[0]) for line in my_session.print_lines if 'going forward' in line]
      
     return imInfo
-    
-    
-    
-
-
-
-
-
-
-
-
-
     
 
 def saveMatStruct(dictOut, outPath, ID, sessionType, date):
@@ -244,36 +265,43 @@ def saveMatStruct(dictOut, outPath, ID, sessionType, date):
     sio.savemat(savePath + sessionType + '_' + date + '.mat',{'behavioural_data':dictOut}) 
 
 
-txtFiles = getTxtFiles(fPath)
 
-for txtFile in txtFiles:
-    try:
-        my_session = pc.Session(txtFile, False)
-    except StopIteration:
-        print('blank txt files in directory')
-        continue
-    
-        #runWorkflow(txtFile, outPath)
-    
 
+initialise(fPath)    
+      
         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
 
-#
-    
 
     
     
-    
-    
-    
-    
-    
-    
-    #np.set_printoptions(threshold=np.nan)     
-    
-    
-    
-    
-    
-    
+
