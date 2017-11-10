@@ -29,9 +29,10 @@ for i = 1:length(allMats)
     date = strrep(date,'-','_');
     date = strcat('date_', date);
       
-    % get the area number
+    % get the area number and take out '0' so it matches with imaging
     if isfield(raw, 'area')
         area = raw.area;
+        area = erase(area,'0');
     else
         area = 'area_not_found';      
     end

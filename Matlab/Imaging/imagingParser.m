@@ -39,14 +39,15 @@ for i = 1:length(allMats)
     %Suite2p gives a neuropil coefficient (r) for each ROI.
     %Calculate the mean r for each plane, for each area acquired.
     %This should be the neuropil coefficiennt described in Chen, 2013 and Kerlin, 2010
-
+    
+  %  keyboard
     
     r_coefficient = mean([dat.stat.neuropilCoefficient]);
     for kk = 1:length(dat.stat)
         if dat.stat(kk).iscell
-            spike_timings=zeros(1,length(dat.Fcell{1,plane}));
+            spike_timings=zeros(1,length(dat.Fcell{:}));
             spike_timings(dat.stat(kk).st)= dat.stat(kk).c;
-            ROIs_corrected=[ROIs_corrected; (dat.Fcell{1,plane}(kk,:)-(dat.FcellNeu{1,plane}(kk,:)*r_coefficient))]; %subtract neuropil as in Chen, 2013-nature methods
+            ROIs_corrected=[ROIs_corrected; (dat.Fcell{:}(kk,:)-(dat.FcellNeu{:}(kk,:)*r_coefficient))]; %subtract neuropil as in Chen, 2013-nature methods
             is_red_neuron=[is_red_neuron; dat.stat(kk).redcell];
             spike_traces=[spike_traces; spike_timings];
             neuron_position=[neuron_position; dat.stat(kk).med]; % for each roi, first column is the x median and second column in y median.
@@ -58,10 +59,15 @@ for i = 1:length(allMats)
     % a single file
     planeStr = ['plane' int2str(plane)];
     
-    regionStr = ['region' int2str(region)];
+    regionStr = ['area' int2str(region)];
     regionStr = regionStr(find(~isspace(regionStr)));
     
+    % create a date string that is a vaid structure name and matches
+    % that yielded by the behaviour
+    date = insertAfter(date, 4, '_');
+    date = insertAfter(date, 7, '_');
     dateStr = ['date_' date];
+    
     
     % build the imaging structure with the dynamic field names
     % corresponding to the area (region) and plane

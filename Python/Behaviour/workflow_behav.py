@@ -56,7 +56,7 @@ def runWorkflow(txtFile, outPath):
         # get basic information required in all behaviours in the BSB 
         basicInfo = getBasicInfo(my_session)
         
-        if sessionType == 'habituation':
+        if 'habituation' in sessionType:
             dictOut = basicInfo
         elif sessionType == 'recognition':
             training = getTraining(my_session)
@@ -110,8 +110,12 @@ def getMetaData(my_session):
     
     # find the task the mouse did corresponding to the text file.
     # call the function relevant to that task 
-    if 'habituation' in name:      
-        sessionType = 'habituation' 
+    if 'habituation' in name:
+        if 'firstday'  in name:
+            sessionType = 'habituation_fd'
+        else:
+            sessionType = 'habituation'
+        
     
     elif '2p' in name:
         if 'whiskerstim' in name:
@@ -132,7 +136,7 @@ def getMetaData(my_session):
         else:     
             sessionType = 'recognition'
     else:
-        raise ValueError('Could not assign task to text file %s' % my_session.experiment_name)
+        raise ValueError('Could not assign task to text file %s' % my_session.file_name)
 
         
         
