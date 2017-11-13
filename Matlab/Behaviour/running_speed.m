@@ -1,7 +1,7 @@
 function [speed, mid_time_bin] = running_speed(behavioural_data)
 
 % function to parse the running speed of the mouse based on the time
-% bins at which the mouse is recorded as moving forwards
+% bins at which the mouse is recorded as moving forward
 
 % mariangela 2017
 % edit JR 2017
