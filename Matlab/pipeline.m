@@ -32,33 +32,86 @@ savePath = '/home/jamesrowland/Documents/ProcessedData/fullStructures/';
 imaging = imagingParser(imagingPath, mouse);
 behaviour = behaviourParser(behaviourPath, mouse);
 
-% shift the imaging behaviour into the imaging structure
-imaging = shiftBehaviour(imaging, behaviour);
+% shift the imaging behaviour into the imaging structure, allign to the
+% behaviour and generate time series trial by trial data.
+imaging = timeSeries(imaging, behaviour);
+
+tbt = imaging.date_2017_11_15.area1.plane1.trialByTrial;
+
+%x = zeros(65, 124, 33);
+
+for i = 1:length(tbt)
+   trial = tbt{i};
+   
+   x(:,:,i) = trial(:,1:62);
+end
+
+tAv = mean(x,3);
+
+cAv = mean(tAv,1);
+
+
+xAxis = linspace(0,62/15,62);
+
+
+%close all, figure, hold on
+% plot(xAxis,cAv)
+% plot(repmat(1,100),linspace(0.08,0.17,100))
+% xlabel('time (seconds)')
+% ylabel('(F-F0)/F0')
+close all, figure, hold on
+for i = 1:12
+    subplot(3,4,i)
+    plot(xAxis,tAv(i,:))
+    xlabel('time (seconds)')
+    ylabel('(F-F0)/F0')
+    set(gca, 'xlim', [0 4])
+    set(gca,'ytick',[])
+
+end
+    
+    
 
 
 
 
 
-% b = imaging.date_2017_10_18.area2.stimulation;
-% st = imaging.date_2017_10_18.area2.plane1.spike_timings;
-
-%fRate = 
 
 
 
-% 
-% data = {};
-% 
-% data.imaging = imaging;
-% data.behaviour = behaviour;
-% 
-
-
-% fName = [savePath mouse '.mat'];
-% save(fName, 'imaging', 'behaviour');
 
 
 
-%end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

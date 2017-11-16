@@ -34,7 +34,7 @@ radius_wheel=12; %radius of the wheel in cm
 
 L=(1:time_bins:(end_of_session-time_bins)); %start of the time bin
 U=((1+time_bins):time_bins:end_of_session); %end of time bin
-mid_time_bin=(L+U)/2;
+mid_time_bin=double((L+U)/2);
 
 forwards_count=[]; %number of 3.6 degres steps for each time bin
 
@@ -46,7 +46,7 @@ end
 
 angular_speed_deg=(forwards_count*3.6)/time_bins; % speed is calculated here as degrees every sec
 angular_speed_rad=angular_speed_deg*(2*pi)/360; %radians per second
-speed=angular_speed_rad*radius_wheel; %speed (cm/s)
+speed = double(angular_speed_rad*radius_wheel); %speed (cm/s)
 
 break
 

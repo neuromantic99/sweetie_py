@@ -26,7 +26,7 @@ for i = 1:length(allMats)
     
     %Rois signal corrected for neuropil
     ROIs_corrected=[];
-    dF_calcium_traces=[];
+    dFoF=[];
     %store whether cell is labelled red. 0= no red labelling; 1= red labelling.
     is_red_neuron=[]; 
     %deconvolved spike times in frames
@@ -60,11 +60,20 @@ for i = 1:length(allMats)
                 spike_amps = [];
             end
             
+            
+            
             ROIs_corrected=[ROIs_corrected; (dat.Fcell{:}(kk,:)-(dat.FcellNeu{:}(kk,:)*r_coefficient))]; %subtract neuropil as in Chen, 2013-nature methods
             is_red_neuron=[is_red_neuron; dat.stat(kk).redcell];
             all_spike_times=[all_spike_times; spike_timings];
             all_spike_amps = [all_spike_amps; spike_amps];
             
+            %for each ROI, call the function (dF_percentile) that calculates f-f0/f0.
+%             for nn = 1: size (ROIs_corrected,1)
+%                 dFoF = [dFoF; dF_percentile(ROIs_corrected(nn,:))]; 
+%             end
+            
+            dFoF = ROIs_corrected;
+          
             neuron_position=[neuron_position; dat.stat(kk).med]; % for each roi, first column is the x median and second column in y median.
         end
     end
@@ -85,7 +94,8 @@ for i = 1:length(allMats)
 
     % get the frame rate
     fRate = dat.ops.imageRate;
-    %divide the frame rate by the number of planes
+    %divide the frame rate by the number of planes to get
+    %the frame rate at individual frames
     nPlanes = dat.ops.nplanes;
     fRate = fRate / nPlanes;
     
@@ -96,7 +106,7 @@ for i = 1:length(allMats)
     imaging.(dateStr).(regionStr).(planeStr).spike_timings = all_spike_times;
     imaging.(dateStr).(regionStr).(planeStr).spike_amps = all_spike_amps;
     
-    imaging.(dateStr).(regionStr).(planeStr).fluoresence_corrected = ROIs_corrected;
+    imaging.(dateStr).(regionStr).(planeStr).fluoresence_corrected = dFoF;
     imaging.(dateStr).(regionStr).(planeStr).position = neuron_position;
     imaging.(dateStr).(regionStr).(planeStr).is_red = is_red_neuron;
     imaging.(dateStr).(regionStr).(planeStr).fRate = fRate;
