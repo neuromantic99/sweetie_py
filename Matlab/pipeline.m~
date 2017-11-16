@@ -33,16 +33,38 @@ imaging = imagingParser(imagingPath, mouse);
 behaviour = behaviourParser(behaviourPath, mouse);
 
 % shift the imaging behaviour into the imaging structure
-imaging = shiftBehaviour(imaging, behaviour);
+% still need to change this so it can register multiple behavioural
+% sessions on the same date
+discrim = behaviour.imaging_discrimination;
+stim = behaviour.imaging_stimulation;
+
+for i = 1:length(discrim)
+    date = char(fieldnames(discrim(i)));
+    area = discrim.(date).area;
+    area = erase(area,'0');
+    imaging.(date).(area).discrimination = behaviour.imaging_discrimination(i).(date);
+end
+
+for i = 1:length(stim)
+    date = char(fieldnames(stim(i)));
+    area = stim.(date).area;
+    area = erase(area,'0');
+    imaging.(date).(area).stimulation = behaviour.imaging_stimulation(i).(date);
+end
+
+b = imaging.date_2017_10_18.area2.stimulation;
+st = imaging.date_2017_10_18.area2.plane1.spike_timings;
+
+
+for i =1:30
 
 
 
 
 
-% b = imaging.date_2017_10_18.area2.stimulation;
-% st = imaging.date_2017_10_18.area2.plane1.spike_timings;
 
-%fRate = 
+
+
 
 
 

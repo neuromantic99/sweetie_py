@@ -1,14 +1,20 @@
 function [speed, mid_time_bin] = running_speed(behavioural_data)
 
 % function to parse the running speed of the mouse based on the time
-% bins at which the mouse is recorded as moving forward
+% bins at which the mouse is recorded as moving forwards
 
 % mariangela 2017
 % edit JR 2017
 
 while 1
 
-running_forward = behavioural_data.running_forward;
+try
+    running_forward = behavioural_data.running_forward;
+catch
+    speed = 0;
+    mid_time_bin = 0;
+    break
+end
 
 if isempty(running_forward)
     speed = 0;
@@ -20,11 +26,8 @@ running_forward = reshape(running_forward,1, numel(running_forward));
 
 running_forward = running_forward/1000; %turn data from ms to s
 
-try
 end_of_session = ceil(running_forward(end)); %duration of session in s
-catch
-    keyboard
-end
+
      
 time_bins= 10; %duration of time bins in s
 radius_wheel=12; %radius of the wheel in cm

@@ -29,14 +29,6 @@ for i = 1:length(allMats)
     date = strrep(date,'-','_');
     date = strcat('date_', date);
       
-    % get the area number and take out '0' so it matches with imaging
-    if isfield(raw, 'area')
-        area = raw.area;
-        area = erase(area,'0');
-    else
-        area = 'area_not_found';      
-    end
-        
     % add fields from the raw data structure to the new structure
     fields = fieldnames(raw);
     for ii = 1:length(fields)
@@ -69,7 +61,21 @@ for i = 1:length(allMats)
     
     allSessions.(sessionType).(date).licks = licks;
     allSessions.(sessionType).(date).water_delivered = water_delivered;
+    
+    % get the area number and take out '0' so it matches with imaging
+    if isfield(raw, 'area')
+        area = raw.area;
+        area = erase(area,'0');
+        
+        % filthy way of adding the area field to imaging behaviour only
+        tempStruct.(sessionType).(date).(area) = allSessions.(sessionType).(date);
+        allSessions = tempStruct;
+        
+    else
+        area = 'area_not_found';      
+    end
 
+    
 end
 
 max_water=max(tot_water_deliveries);

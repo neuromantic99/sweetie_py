@@ -82,12 +82,11 @@ for i = 1:length(allMats)
     date = insertAfter(date, 4, '_');
     date = insertAfter(date, 7, '_');
     dateStr = ['date_' date];
-
+    keyboard
     % get the frame rate
     fRate = dat.ops.imageRate;
     %divide the frame rate by the number of planes
     nPlanes = dat.ops.nplanes;
-    fRate = fRate / nPlanes;
     
     
     % build the imaging structure with the dynamic field names
@@ -99,7 +98,6 @@ for i = 1:length(allMats)
     imaging.(dateStr).(regionStr).(planeStr).fluoresence_corrected = ROIs_corrected;
     imaging.(dateStr).(regionStr).(planeStr).position = neuron_position;
     imaging.(dateStr).(regionStr).(planeStr).is_red = is_red_neuron;
-    imaging.(dateStr).(regionStr).(planeStr).fRate = fRate;
 
 end
 

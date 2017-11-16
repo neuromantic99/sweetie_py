@@ -2,6 +2,7 @@ import readPyControl as pc
 import scipy.io as sio
 import os
 import errno
+import numpy as np
 
 '''
 Will process all pycontrol txt files given in the directory 'fPath' file.
@@ -13,7 +14,8 @@ to a mouse and an individual matlab structure for each behavioural session
 
 '''
 
-fPath = '/home/jamesrowland/Documents/RawBehaviour/'
+#fPath = '/home/jamesrowland/Documents/RawData/Behaviour/'
+fPath = '/home/jamesrowland/Documents/RawData/Behaviour/2017-11-15-hf_2p_naive_norun'
 outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/'
 
 
@@ -26,14 +28,12 @@ def initialise(fPath):
         except (StopIteration, UnicodeDecodeError):
             print('blank txt files in directory')
             continue
+    
 
 def runWorkflow(txtFile, outPath):
 
-    #call Tom's behaviour module    
-    
+    #call Tom's behaviour module        
     my_session = pc.Session(txtFile, False)
-    
-    
 
     # get the meta data from the header of the txt file
     [ID, date, sessionType, go_pos] = getMetaData(my_session)
@@ -41,16 +41,28 @@ def runWorkflow(txtFile, outPath):
     # create the dictionary 'dictOut' which will be saved as a .mat file
     # this requires running the appropriate functions for the type of training
     # and merging the individual dictionaries using the line z = {**x, **y}
-   
+    
+    global imInfo
+    
     if sessionType == 'imaging_stimulation':
         imInfo = getImagingInfo(my_session)
         dictOut = imInfo
-        
+
     
     elif sessionType == 'imaging_discrimination':
+        imInfo = getImagingInfo(my_session)        
+        tS = imInfo['tStart'] #start time of the imaging
+        
         training = getTraining(my_session)
-        imInfo = getImagingInfo(my_session)
+       
+        # function that subtracts the start time of imaging from other times 
+        norm =  lambda t: [x - tS for x in t]
+        
+        # subtract tstart from times in dictionary
+        training = {key: norm(val) for key, val in training.items()}
+        
         dictOut = {**training, **imInfo}
+     
 
     else:
         # get basic information required in all behaviours in the BSB 
@@ -65,6 +77,7 @@ def runWorkflow(txtFile, outPath):
             training = getTraining(my_session)
             discrim = getDiscrimination(my_session, go_pos)
             dictOut = {**basicInfo, **training, **discrim}
+            
             
             
     # add the metadata to the dictionary
@@ -92,15 +105,11 @@ def getTxtFiles(fPath):
                
     return txtFiles
         
-        
 
 def getMetaData(my_session):
     #get the ID of the mouse 
     ID = my_session.subject_ID.split('_')[0]
-    
-    
-    
-              
+                 
     # get the date that the session was carried out and use in file name
     date = my_session.datetime_string.split()[0]
     
@@ -118,10 +127,12 @@ def getMetaData(my_session):
         
     
     elif '2p' in name:
-        if 'whiskerstim' in name:
+        if 'whiskerstim' in name or 'naive_norun' in name:
             sessionType = 'imaging_stimulation'
+        
         elif 'trained_water' in name:
             sessionType = 'imaging_discrimination'
+        
             
             # leaving out the go-pos for now, check later
             #go_pos = getGoPos(my_session)
@@ -138,10 +149,7 @@ def getMetaData(my_session):
     else:
         raise ValueError('Could not assign task to text file %s' % my_session.file_name)
 
-        
-        
-            
-             
+         
     return ID, date, sessionType, go_pos
 
 def getGoPos(my_session):
@@ -233,22 +241,35 @@ def getImagingInfo(my_session):
     '''
     
     imInfo = {}
+        
+    try:
+        tS = my_session.times.get('TTL_in')[0]
+    except:
+        tS = []
+        print('blank imaging session txt files in directory')
+    global x
+    imInfo['licks'] =  searchPrintLines(my_session, 'lick')
+    imInfo['water_delivered'] = searchPrintLines(my_session, 'waterON')
+    imInfo['running_forward'] =  my_session.times.get('running mouse')
+    imInfo['running_backward'] = my_session.times.get('moonwalking mouse')
+    #couldnt use 'searchPrintLines' for this because of the conflicting for 'going'
+    imInfo['motor_start'] = [float(line.split()[0]) for line in my_session.print_lines if 'going forward' in line]
+
+    # function that subtracts the start time of imaging from other times 
+    norm =  lambda t: [x - tS for x in t]
+    # subtract tstart from times in dictionary
+    imInfo = {key: norm(val) for key, val in imInfo.items() if type(val) is list or np.ndarray}
     
+    # save tStart for future calculations
+    imInfo['tStart'] = tS
+       
     #get the area, found after the underscore in the ID
     name = my_session.subject_ID
     if 'area' in name:
         imInfo['area'] = my_session.subject_ID.split('_')[1]
     else:
         pass
-    
-    imInfo['licks'] =  searchPrintLines(my_session, 'lick')
-    imInfo['water_delivered'] = searchPrintLines(my_session, 'waterON') 
-    imInfo['running_forward'] =  my_session.times.get('running mouse')
-    imInfo['running_backward'] = my_session.times.get('moonwalking mouse')
 
-    #couldnt use 'searchPrintLines' for this because of the conflicting for 'going'
-    imInfo['motor_start'] = [float(line.split()[0]) for line in my_session.print_lines if 'going forward' in line]
-     
     return imInfo
     
 
@@ -264,26 +285,22 @@ def saveMatStruct(dictOut, outPath, ID, sessionType, date):
         except OSError as exc: # Guard against race condition
             if exc.errno != errno.EEXIST:
                 raise
- 
+    
+    # need information about the area to prevent overwriting in cases where more than 
+    # one behaviour has been recorded on the same day during imaging
+    
+    if 'area' in dictOut:
+        area = dictOut['area']
+    else:
+        area = ''
+    
     #save the dictionary as a matlab structure in the mouse folder
-    sio.savemat(savePath + sessionType + '_' + date + '.mat',{'behavioural_data':dictOut}) 
-
+    sio.savemat(savePath + sessionType + '_' + date + area + '.mat',{'behavioural_data':dictOut}) 
 
 
 
 initialise(fPath)    
-      
-        
-
-
-
-
-
-
-
-
-
-
+    
 
 
 

@@ -29,15 +29,6 @@ for i = 1:length(allMats)
     date = strrep(date,'-','_');
     date = strcat('date_', date);
       
-    % get the area number
-    if isfield(a.b,'c')
-        if raw.area
-            area = session.area;
-        else
-            area = 'area_not_found';
-        end
-    end
-        
     % add fields from the raw data structure to the new structure
     fields = fieldnames(raw);
     for ii = 1:length(fields)
@@ -50,29 +41,37 @@ for i = 1:length(allMats)
     % save running data in the allSessions structure
     allSessions.(sessionType).(date).speed = speed;
     allSessions.(sessionType).(date).mid_time_bin = mid_time_bin';
-    
+
     try
-        water_delivered = raw.water;
+        water_delivered = raw.water_delivered;
+        water_delivered = water_delivered/1000; % convert to ms
     catch
         disp(['no water delivered field for ' mouse ' ' session.name]) 
     end
     
     try
         licks = raw.licks;
+        licks=licks/1000; %convert to ms
     catch
         disp(['no lick field for ' mouse ' ' session.name]) 
     end
-    
-    % convert the timing of licks and water delivered to ms
-    licks=licks/1000;
-    water_delivered=water_delivered/1000;
     
     % the total number of water deliverys across sessions
     tot_water_deliveries=[tot_water_deliveries length(water_delivered)];
     
     allSessions.(sessionType).(date).licks = licks;
     allSessions.(sessionType).(date).water_delivered = water_delivered;
+    
+    % get the area number and take out '0' so it matches with imaging
+    if isfield(raw, 'area')
+        area = raw.area;
+        area = erase(area,'0');
+    else
+        area = 'area_not_found';      
+    end
+    
 
+    
 end
 
 max_water=max(tot_water_deliveries);
