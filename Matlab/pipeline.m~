@@ -7,10 +7,10 @@ mouse = 'CGCC5.4a';
 
 % Requires the functions: behaviourParser, imagingParser, dF_percentile,
 % running_speed
-% 
+%
 % set 'imagingPath' as the path to where all the suite2p processed imaging
 % information is stored. Each mouse should have its own folder called after
-% the name of the mouse. Otherwise the folder structure in this directory  
+% the name of the mouse. Otherwise the folder structure in this directory
 % is irrelevant as all information about the mouse is contained in the dat
 % file
 
@@ -23,7 +23,7 @@ mouse = 'CGCC5.4a';
 % the pipeline function can also be used within matlab to return the
 % structure 'data' containing both imaging and behaviour
 
-% all of these paths must end with a '/' this can be responsible for 
+% all of these paths must end with a '/' this can be responsible for
 % a variety of errors
 imagingPath = '/home/jamesrowland/Documents/ProcessedData/imaging/';
 behaviourPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/';
@@ -36,22 +36,36 @@ behaviour = behaviourParser(behaviourPath, mouse);
 % behaviour and generate time series trial by trial data.
 imaging = timeSeries(imaging, behaviour);
 
-tbt = imaging.date_2017_11_15.area1.plane1.trialByTrial;
+tBtSt = imaging.date_2017_11_16.area1.plane2.trialByTrialSpikes;
 
-%x = zeros(65, 124, 33);
 
-for i = 1:length(tbt)
-   trial = tbt{i};
-   
-   x(:,:,i) = trial(:,1:124);
+
+dimens = size(tBtSt);
+
+allSpike = [];
+
+allTrialSpikes = {};
+
+
+
+for t = 1:dimens(1)
+    
+    tSpikes = tBtSt(t,:); 
+    
+    
+    for u = 1:dimens(2)
+        
+        tCell = tBtSt{t,u};
+        
+        
+        for s = 1:length(tCell)
+            allSpike = [allSpike tCell(s)];
+        end
+        
+    end
+    
 end
 
-tAv = mean(x,3);
-
-cAv = mean(tAv,1);
-
-close all, figure, hold on
-plot(cAv)
 
 
 
@@ -68,8 +82,74 @@ plot(cAv)
 
 
 
-    
-    
+
+
+%
+%
+% %plot sample fluoresence
+% for i = 1:length(tBtFlu)
+%
+%    trial = tBtFlu{i};
+%
+%
+%    x(:,:,i) = trial(:,1:62);
+%
+% end
+%
+% tAv = mean(x,3);
+%
+% cAv = mean(tAv,1);
+%
+%
+% xAxis = linspace(0,62/15,62);
+%
+%
+% close all, figure, hold on
+% plot(xAxis,cAv)
+% %plot(repmat(1,100),linspace(0.08,0.17,100))
+% xlabel('time (seconds)')
+% ylabel('(F-F0)/F0')
+% % close all, figure, hold on
+% % for i = 1:12
+% %     subplot(3,4,i)
+% %     plot(xAxis,tAv(i+15,:))
+% %     xlabel('time (seconds)')
+% %     ylabel('(F-F0)/F0')
+% %     set(gca, 'xlim', [0 4])
+% %     set(gca,'ytick',[])
+% %
+% % end
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+
+
+
+
+
+
 
 
 

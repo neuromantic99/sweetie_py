@@ -10,11 +10,11 @@ end
 
 dates = fieldnames(imaging);
 
-for i = 1:length(dates)   
+for i = 1:length(dates)
     
     date = dates{i};
     
-    areas = fieldnames(imaging.(date)); 
+    areas = fieldnames(imaging.(date));
     
     for ii = 1:length(areas)
         
@@ -24,17 +24,17 @@ for i = 1:length(dates)
         % corresponding to those planes
         iFields = fieldnames(imaging.(date).(area));
         % get the names of just the planes
-        planesIND = strfind(iFields,'plane');       
+        planesIND = strfind(iFields,'plane');
         planes = iFields(find(not(cellfun('isempty', planesIND))));
         
         % get the name of just the behaviour
-        behavName = iFields(find(cellfun('isempty', planesIND))); 
-
+        behavName = iFields(find(cellfun('isempty', planesIND)));
+        
         behav = imaging.(date).(area).(behavName{1});
         
         % the start of the trial (in frames) indicted by the start of the motor
         tStart = behav.motor_start;
-        tStart = tStart - 15;
+        %tStart = tStart - 15;
         
         for iii = 1:length(planes)
             
@@ -42,34 +42,56 @@ for i = 1:length(dates)
             
             % this variable will be the result of iterating
             % through each imaging behavioural session
-            session = imaging.(date).(area).(plane);  
+            session = imaging.(date).(area).(plane);
             
             fluro = session.fluoresence_corrected;
-           
+            st = session.spike_timings;
+            
+            
             % cell containing trial by trial information
-            tBt = {};
+            tBtFlu = {};
+            
+            %2d cell containing spike timings by each unit
+            tBtSt = {};
             for t = 1:length(tStart)-1
                 
                 % split the corrected flurosence by trial
-                tBt{t} = fluro(:,tStart(t):tStart(t+1));
+                tBtFlu{t} = fluro(:,tStart(t):tStart(t+1));
                 
-         
+                for unit = 1:length(st)
+                    
+                    u = st{unit};
+                    
+                    idx = find(u >= tStart(t) & u <= tStart(t+1));
+                    
+                    tBtSt{unit,t} = u(idx) - tStart(t);
+                    
+                end
             end
             
-           %append to the imaging structure
-           imaging.(date).(area).(plane).trialByTrial = tBt;
-                 
-         
-                 
-                 
+            
+            
+            
+            
+            
+            
+            
+            %append to the imaging structure
+            imaging.(date).(area).(plane).trialByTrialFlu = tBtFlu;
+            imaging.(date).(area).(plane).trialByTrialSpikes = tBtSt;
+
+            
+            
+            
+            
         end
     end
-                 
-                
-        
-        
-    end
     
+    
+    
+    
+end
+
 end
 
 

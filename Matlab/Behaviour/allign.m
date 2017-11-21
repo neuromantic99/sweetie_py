@@ -30,9 +30,12 @@ for i = 1:length(bFields)
         
         session = behav.(date).(area);  
         sFields = fieldnames(session);
-
+        
+        
+        
         % get the imaging session relevant to the behaviour
-        imSession = imaging.(date).(areas{ii}).plane1;
+        iFields = fieldnames(imaging.(date).(areas{ii}));
+        imSession = imaging.(date).(areas{ii}).(iFields{1});
 
         % get the frame rate of the imaging on each date in
         % each area   

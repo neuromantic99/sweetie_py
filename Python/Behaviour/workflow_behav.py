@@ -15,7 +15,7 @@ to a mouse and an individual matlab structure for each behavioural session
 '''
 
 #fPath = '/home/jamesrowland/Documents/RawData/Behaviour/'
-fPath = '/home/jamesrowland/Documents/RawData/Behaviour/2017-11-15-hf_2p_naive_norun'
+fPath = '/home/jamesrowland/Documents/RawData/Behaviour/'
 outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/'
 
 
@@ -239,7 +239,7 @@ def getImagingInfo(my_session):
     the behaviour under 2p is stored differently to in the bsb,
     thus a new function is required    
     '''
-    
+
     imInfo = {}
         
     try:
@@ -256,10 +256,14 @@ def getImagingInfo(my_session):
     imInfo['motor_start'] = [float(line.split()[0]) for line in my_session.print_lines if 'going forward' in line]
 
     # function that subtracts the start time of imaging from other times 
-    norm =  lambda t: [x - tS for x in t]
+
+    norm = lambda t: [x - tS for x in t]
+
     # subtract tstart from times in dictionary
-    imInfo = {key: norm(val) for key, val in imInfo.items() if type(val) is list or np.ndarray}
     
+    imInfo = {key: norm(val) for key, val in imInfo.items() if type(val) is list or type(val) is np.ndarray}
+    
+
     # save tStart for future calculations
     imInfo['tStart'] = tS
        

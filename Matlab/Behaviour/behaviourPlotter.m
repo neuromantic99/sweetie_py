@@ -1,4 +1,4 @@
-clear
+function percentCorrect = behaviourPlotter(behav)
 
 % set path to the complete structures make sure this ends with '/'
 fPath = '/home/jamesrowland/Documents/ProcessedData/fullStructures/';
@@ -11,12 +11,12 @@ mouse = 'VIP41.3a';
 
 % the type of behaviour of interest - currently: habituation,
 % discrimination,  imaging stimulation, imaging discrimination,
-task = 'discrimination';
+task = 'recognition';
 
 
-% load all behavioural data for the animal
-f = load([fPath mouse '.mat']);
-behav = f.behaviour;
+% % load all behavioural data for the animal
+% f = load([fPath mouse '.mat']);
+% behav = f.behaviour;
 
 % change date to correct format
 %date = strcat('date_',date);
@@ -70,8 +70,7 @@ function yaxis = rasterY(x)
     yaxis = ones(1,length(x));
 end
 
-
-    
+end
     
     
     
