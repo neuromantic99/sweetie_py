@@ -14,9 +14,8 @@ to a mouse and an individual matlab structure for each behavioural session
 
 '''
 
-#fPath = '/home/jamesrowland/Documents/RawData/Behaviour/'
-fPath = '/home/jamesrowland/Documents/RawData/Behaviour/'
-outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/'
+fPath = '/home/jamesrowland/Documents/RawData/ANA'
+outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/ANA'
 
 
 def initialise(fPath):
@@ -41,12 +40,12 @@ def runWorkflow(txtFile, outPath):
     # create the dictionary 'dictOut' which will be saved as a .mat file
     # this requires running the appropriate functions for the type of training
     # and merging the individual dictionaries using the line z = {**x, **y}
-    
-    global imInfo
-    
+
     if sessionType == 'imaging_stimulation':
         imInfo = getImagingInfo(my_session)
         dictOut = imInfo
+        
+    
 
     
     elif sessionType == 'imaging_discrimination':
@@ -62,6 +61,12 @@ def runWorkflow(txtFile, outPath):
         training = {key: norm(val) for key, val in training.items()}
         
         dictOut = {**training, **imInfo}
+        
+    elif sessionType == 'flavour':
+        flavourInfo = getFlavourInfo(my_session)
+        dictOut = flavourInfo
+        
+    
      
 
     else:
@@ -132,6 +137,10 @@ def getMetaData(my_session):
         
         elif 'trained_water' in name:
             sessionType = 'imaging_discrimination'
+            
+            
+        elif 'flavour' in name:
+            sessionType = 'flavour'
         
             
             # leaving out the go-pos for now, check later
@@ -146,9 +155,15 @@ def getMetaData(my_session):
             go_pos = getGoPos(my_session)
         else:     
             sessionType = 'recognition'
+            
+
+    
+    
     else:
         raise ValueError('Could not assign task to text file %s' % my_session.file_name)
 
+
+    
          
     return ID, date, sessionType, go_pos
 
@@ -194,8 +209,8 @@ def searchPrintLines(my_session, I):
 def getBasicInfo(my_session):
     
     basicInfo = {}
-    
-    basicInfo['water_delivered'] = searchPrintLines(my_session, 'waterON')   
+    # couldnt use MSPL as water and waterON are recorded 
+    basicInfo['water_delivered'] = [float(line.split()[0]) for line in my_session.print_lines if 'water' in line]
     basicInfo['running_forward'] =  my_session.times.get('going_forward')
     basicInfo['licks'] =  my_session.times.get('lick_event')    
    
@@ -247,7 +262,7 @@ def getImagingInfo(my_session):
     except:
         tS = []
         print('blank imaging session txt files in directory')
-    global x
+    
     imInfo['licks'] =  searchPrintLines(my_session, 'lick')
     imInfo['water_delivered'] = searchPrintLines(my_session, 'waterON')
     imInfo['running_forward'] =  my_session.times.get('running mouse')
@@ -275,6 +290,29 @@ def getImagingInfo(my_session):
         pass
 
     return imInfo
+
+
+def getFlavourInfo(my_session):
+    flavInfo = {}
+    flavInfo['running_forward'] = my_session.times.get('going_forward')
+    flavInfo['licks'] = my_session.times.get('lick_event')
+    
+    flavInfo['flavourA'] = [float(line.split()[0]) for line in my_session.print_lines if len(line.split()) > 2 and line.split()[2] == 'A']
+    flavInfo['flavourB'] = [float(line.split()[0]) for line in my_session.print_lines if len(line.split()) > 2 and line.split()[2] == 'B']
+    
+    name = my_session.subject_ID
+    if 'area' in name:
+        flavInfo['area'] = my_session.subject_ID.split('_')[1]
+    else:
+        pass
+
+  
+    
+    
+    
+    return flavInfo
+    
+
     
 
 def saveMatStruct(dictOut, outPath, ID, sessionType, date):

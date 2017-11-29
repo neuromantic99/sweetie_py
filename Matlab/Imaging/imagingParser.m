@@ -36,16 +36,18 @@ for i = 1:length(allMats)
     %position of the neuron in (x,y) coordinates
     neuron_position=[];
     
+    %count the number of cells found
+    counter = 0;
     
     %Suite2p gives a neuropil coefficient (r) for each ROI.
     %Calculate the mean r for each plane, for each area acquired.
     %This should be the neuropil coefficiennt described in Chen, 2013 and Kerlin, 2010
-    
-  %  keyboard
-    
+
     r_coefficient = mean([dat.stat.neuropilCoefficient]);
     for kk = 1:length(dat.stat)
         if dat.stat(kk).iscell
+            
+            counter = counter + 1;
             
             %maris code to represent spike times as a binary vector
             %spike_timings=zeros(1,length(dat.Fcell{:}));
@@ -61,20 +63,17 @@ for i = 1:length(allMats)
             end
             
             
+            %subtract neuropil as in Chen, 2013-nature methods
+            ROIs_corrected=[ROIs_corrected; (dat.Fcell{:}(kk,:)-(dat.FcellNeu{:}(kk,:)*r_coefficient))];
             
-            ROIs_corrected=[ROIs_corrected; (dat.Fcell{:}(kk,:)-(dat.FcellNeu{:}(kk,:)*r_coefficient))]; %subtract neuropil as in Chen, 2013-nature methods
             is_red_neuron=[is_red_neuron; dat.stat(kk).redcell];
             all_spike_times=[all_spike_times; spike_timings];
             all_spike_amps = [all_spike_amps; spike_amps];
             
-            %for each ROI, call the function (dF_percentile) that calculates f-f0/f0.
-%             for nn = 1: size (ROIs_corrected,1)
-%                 dFoF = [dFoF; dF_percentile(ROIs_corrected(nn,:))]; 
-%             end
+            dFoF = [dFoF; dF_percentile(ROIs_corrected(counter,:))]; 
             
-            dFoF = ROIs_corrected;
-          
-            neuron_position=[neuron_position; dat.stat(kk).med]; % for each roi, first column is the x median and second column in y median.
+            % for each roi, first column is the x median and second column in y median.
+            neuron_position=[neuron_position; dat.stat(kk).med];
         end
     end
     

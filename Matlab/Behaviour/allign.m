@@ -30,17 +30,16 @@ for i = 1:length(bFields)
         
         session = behav.(date).(area);  
         sFields = fieldnames(session);
-        
-        
-        
+      
         % get the imaging session relevant to the behaviour
         iFields = fieldnames(imaging.(date).(areas{ii}));
         imSession = imaging.(date).(areas{ii}).(iFields{1});
 
         % get the frame rate of the imaging on each date in
         % each area   
-        %fRate = imSession.fRate;
-        fRate = 15.03;
+        
+        fRate = imSession.fRate / 2;
+        %fRate = 15.03;
 
         % get the length of the imaging in seconds
         maxFrame = length(imSession.fluoresence_corrected);
@@ -54,8 +53,17 @@ for i = 1:length(bFields)
 
             if isa(f,'double')
                 
-                %convert from ms to s
-                fSecs = f/1000;
+                if strcmp(sFields{iii}, 'speed')
+                    continue
+                end
+                
+                % mid_time_bin is already in seconds
+                if ~strcmp(sFields{iii}, 'mid_time_bin') 
+                    fSecs = f/1000; %convert from ms to s
+                else
+                    fSecs = f;
+                end
+                    
 
                 %remove behavioural data that occured 
                 %after imaging stopped
@@ -68,7 +76,7 @@ for i = 1:length(bFields)
                 
                 % change the session field to reflect fBin
                 session.(sFields{iii}) = fBin;
-
+                
             end
         end
         

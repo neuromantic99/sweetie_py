@@ -18,7 +18,7 @@ for i = 1:length(allMats)
     session = allMats(i);
    
     % load the raw data and save it to the structure
-    f = load([session.folder '/' session.name]);
+    f = load([fPath '/' session.name]);
     raw = f.behavioural_data;
     
     sessionType = raw.sessionType;
@@ -68,13 +68,15 @@ for i = 1:length(allMats)
         area = erase(area,'0');
         
         % filthy way of adding the area field to imaging behaviour only
-        tempStruct.(sessionType).(date).(area) = allSessions.(sessionType).(date);
-        allSessions = tempStruct;
+        tempStruct.(date).(area) = allSessions.(sessionType).(date);
+        allSessions.(sessionType) = tempStruct;
+        
+        
         
     else
         area = 'area_not_found';      
     end
-
+    %keyboard
     
 end
 
@@ -86,6 +88,7 @@ end
 
 allSessions.max_water = max_water;
 allSessions.proportion_over_sessions = proportion_over_sessions;
+allSessions.tot_water_deliveries = tot_water_deliveries;
 
 end
 

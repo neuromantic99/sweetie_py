@@ -46,6 +46,7 @@ for i = 1:length(dates)
             
             fluro = session.fluoresence_corrected;
             st = session.spike_timings;
+            amps = session.spike_amps;
             
             
             % cell containing trial by trial information
@@ -53,6 +54,7 @@ for i = 1:length(dates)
             
             %2d cell containing spike timings by each unit
             tBtSt = {};
+            tBtAmps = {};
             for t = 1:length(tStart)-1
                 
                 % split the corrected flurosence by trial
@@ -60,25 +62,32 @@ for i = 1:length(dates)
                 
                 for unit = 1:length(st)
                     
+                    % split the spike timings by trial
                     u = st{unit};
-                    
-                    idx = find(u >= tStart(t) & u <= tStart(t+1));
-                    
+                    a = amps{unit};
+                    idx = find(u >= tStart(t) & u <= tStart(t+1));                    
                     tBtSt{unit,t} = u(idx) - tStart(t);
+                    
+                    tBtAmps{unit, t} = a(idx);
                     
                 end
             end
             
+            nTrials = t;
+            nUnits = size(tBtFlu{1},1);
+            nFrames = size(tBtFlu{1},2);
             
-            
-            
-            
-            
-            
-            
+         
+            comment = ['Dear Friedemann there are ' int2str(nTrials) ' trials, ' ...
+                int2str(nUnits) ' units and ' int2str(nFrames) 'ish frames'];  
+             
             %append to the imaging structure
             imaging.(date).(area).(plane).trialByTrialFlu = tBtFlu;
             imaging.(date).(area).(plane).trialByTrialSpikes = tBtSt;
+            imaging.(date).(area).(plane).trialByTrialAmps = tBtAmps;
+            imaging.(date).(area).(plane).info = comment;
+            
+            
 
             
             

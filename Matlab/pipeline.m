@@ -1,4 +1,6 @@
-function data = pipeline(mouse)
+%function [imaging, behaviour] = pipeline(mouse)
+ 
+mouse = 'CGCC5.4a';
 
 % Pipeline to generate the structure containing all the information
 % (behaviour and imaging about a mouse.
@@ -43,8 +45,16 @@ fNameBehaviour = [savePath '/behaviour/' mouse '.mat'];
 imaging = imagingParser(imagingPath, mouse);
 behaviour = behaviourParser(behaviourPath, mouse);
 
+% the type of behaviour of interest - currently: habituation,
+% discrimination, recognition imaging stimulation, imaging discrimination,
+task = 'recognition';
+
+%plot the behaviour of interest
+%pc = behaviourPlotter(behaviour, task);
+
 % save behavioural data to structure
 save(fNameBehaviour, 'behaviour');
+
 
 % shift the imaging behaviour into the imaging structure, allign to the
 % behaviour and generate time series trial by trial data.
@@ -55,7 +65,45 @@ end
 
 
 
-end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% 
+% Fl = imaging.date_2017_11_15.area1.plane1.trialByTrialFlu;
+% 
+% t10 = Fl{15};
+% close all
+% for i = 1:18
+%     subplot(6,3,i)
+%     plot(t10(i,:))
+%     set(gca, 'ylim', [-1 6])
+% end
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
