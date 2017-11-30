@@ -12,14 +12,7 @@ for i = 1:length(allMats)
     % load the dat file from an imaging session
     session = allMats(i);
     f = load([session.folder '/' session.name]);
-    
-    % some proc files are composed of 1 field 'dat' some just contain
-    % all the information at the start of the mat file 
-    if isfield(f, 'dat')
-        dat = f.dat;
-    else
-        dat = f;
-    end
+    dat = f.dat;
     
     % get the plane number - stored as the 'iplane' variable in the ops
     % file
@@ -109,8 +102,8 @@ for i = 1:length(allMats)
     % build the imaging structure with the dynamic field names
     % corresponding to the area (region) and plane
     imaging.(dateStr).(regionStr).(planeStr).raw_fluoresence = dat.Fcell;
-    imaging.(dateStr).(regionStr).(planeStr).raw_neuropil = dat.FcellNeu;
-   % imaging.(dateStr).(regionStr).(planeStr).spike_timings = all_spike_times;
+    imaging.(dateStr).(regionStr).(planeStr).raw_fluoresence
+    imaging.(dateStr).(regionStr).(planeStr).spike_timings = all_spike_times;
     imaging.(dateStr).(regionStr).(planeStr).spike_amps = all_spike_amps;
     
     imaging.(dateStr).(regionStr).(planeStr).fluoresence_corrected = dFoF;
