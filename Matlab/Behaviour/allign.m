@@ -19,10 +19,11 @@ bFields = fieldnames(behav);
 for i = 1:length(bFields)   
         
     date = bFields{i};
+    keyboard
     try
         areas = fieldnames(imaging.(date)); 
     catch
-        warning('I cant find the bahaviour to match the imaging session from %s', date)
+        warning('Cannot find both the imaging and the behaviour from date  %s', date)
         continue
     end
     
