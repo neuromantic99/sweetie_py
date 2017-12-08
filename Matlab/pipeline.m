@@ -48,7 +48,7 @@ behaviour = behaviourParser(behaviourPath, mouse);
 task = 'imaging_discrimination';
 
 %plot the behaviour of interest
-pc = behaviourPlotter(behaviour, task);
+%pc = behaviourPlotter(behaviour, task);
 
 % save behavioural data to structure
 save(fNameBehaviour, 'behaviour');

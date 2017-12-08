@@ -22,7 +22,7 @@ def initialise(fPath):
     txtFiles = getTxtFiles(fPath)
 
     for txtFile in txtFiles:
-        
+       
         try:
             runWorkflow(txtFile, outPath)
         except (StopIteration, UnicodeDecodeError):
@@ -338,6 +338,8 @@ def saveMatStruct(dictOut, outPath, ID, sessionType, date):
         area = dictOut['area']
     else:
         area = ''
+        
+    print(savePath + sessionType + '_' + date + area + '.mat')
     
     #save the dictionary as a matlab structure in the mouse folder
     sio.savemat(savePath + sessionType + '_' + date + area + '.mat',{'behavioural_data':dictOut}) 

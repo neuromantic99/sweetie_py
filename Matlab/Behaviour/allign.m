@@ -32,8 +32,12 @@ for i = 1:length(bFields)
         % this variable will be the result of iterating
         % through each imaging behavioural session       
         area = areas{ii};
+        try
+            session = behav.(date).(area);  
+        catch
+            error('an error here most likely means the subject ID on a file is incorrect')
+        end
         
-        session = behav.(date).(area);  
         sFields = fieldnames(session);
       
         % get the imaging session relevant to the behaviour
