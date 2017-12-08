@@ -19,7 +19,7 @@ bFields = fieldnames(behav);
 for i = 1:length(bFields)   
         
     date = bFields{i};
-    keyboard
+    
     try
         areas = fieldnames(imaging.(date)); 
     catch
