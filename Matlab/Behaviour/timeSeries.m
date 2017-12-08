@@ -34,7 +34,7 @@ for i = 1:length(dates)
         try
             behav = imaging.(date).(area).(behavName{1});
         catch
-            warning('I cant fine the bahaviour to match the imaging session from %s', date)
+            warning('I cant find the bahaviour to match the imaging session from %s', date)
             continue
         end
                         

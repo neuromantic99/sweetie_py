@@ -101,7 +101,7 @@ elseif strcmp(task, 'imaging_stimulation') || strcmp(task, 'imaging_discriminati
             
             plot(correct{i,ii}, rasterY(correct{i,ii})*i, '.b')
             plot(missed{i,ii}, rasterY(missed{i,ii})*i, '.r')
-            plot(fp{i,ii}, rasterY(fp{i,ii})*i, '.m')
+            plot(fp{i,ii}, rasterY(fp{i,ii})*i, '.bl')
             plot(cr{i,ii}, rasterY(cr{i,ii})*i, '.g')
             set(gca, 'ylim', [0,i+1], 'ytick', (0:1:i+1))
             ylabel('session number')

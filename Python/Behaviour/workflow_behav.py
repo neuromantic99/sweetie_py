@@ -14,14 +14,15 @@ to a mouse and an individual matlab structure for each behavioural session
 
 '''
 
-fPath = '/home/jamesrowland/Documents/RawData/ANA'
-outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/ANA'
+fPath = '/media/jamesrowland/DATA/RawData/Behaviour/'
+outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/'
 
 
 def initialise(fPath):
     txtFiles = getTxtFiles(fPath)
 
     for txtFile in txtFiles:
+        
         try:
             runWorkflow(txtFile, outPath)
         except (StopIteration, UnicodeDecodeError):
@@ -45,10 +46,8 @@ def runWorkflow(txtFile, outPath):
         imInfo = getImagingInfo(my_session)
         dictOut = imInfo
         
-    
 
-    
-    elif sessionType == 'imaging_discrimination':
+    elif sessionType == 'imaging_discrimination' or sessionType == 'imaging_detection':
         imInfo = getImagingInfo(my_session)        
         tS = imInfo['tStart'] #start time of the imaging
         
@@ -65,6 +64,7 @@ def runWorkflow(txtFile, outPath):
     elif sessionType == 'flavour':
         flavourInfo = getFlavourInfo(my_session)
         dictOut = flavourInfo
+        return
         
     
      
@@ -96,7 +96,7 @@ def runWorkflow(txtFile, outPath):
     for key, value in dictOut.items():
          if value is None:
              dictOut[key] = 'No Values Found'
-      
+
     saveMatStruct(dictOut, outPath, ID, sessionType, date)
         
 def getTxtFiles(fPath):
@@ -135,18 +135,20 @@ def getMetaData(my_session):
         if 'whiskerstim' in name or 'naive_norun' in name:
             sessionType = 'imaging_stimulation'
         
-        elif 'trained_water' in name:
+        elif 'trained_water' in name or 'gonogo' in name:
             sessionType = 'imaging_discrimination'
+            
+        elif 'detection' in name:
+            sessionType = 'imaging_detection'
             
             
         elif 'flavour' in name:
             sessionType = 'flavour'
-        
             
             # leaving out the go-pos for now, check later
             #go_pos = getGoPos(my_session)
         else:
-            raise ValueError('unknown imaging behaviour')
+            raise ValueError('unknown imaging behaviour %s' %my_session.file_name)
         
         
     elif 'training' in my_session.experiment_name:
@@ -226,6 +228,7 @@ def getTraining(my_session):
     training['correct_trials'] = searchPrintLines(my_session, 'correct')
     training['missed_trials']  = searchPrintLines(my_session, 'missed')
     training['falsepositive_trials'] =  searchPrintLines(my_session, 'false_positive')
+    training['correctrejection_trials'] = searchPrintLines(my_session,'rejection')
     
     return training
     

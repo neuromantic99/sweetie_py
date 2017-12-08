@@ -19,7 +19,12 @@ bFields = fieldnames(behav);
 for i = 1:length(bFields)   
         
     date = bFields{i};
-    areas = fieldnames(imaging.(date)); 
+    try
+        areas = fieldnames(imaging.(date)); 
+    catch
+        warning('I cant find the bahaviour to match the imaging session from %s', date)
+        continue
+    end
     
     % loop through each area of the behaviour at each date
     for ii = 1:length(areas)

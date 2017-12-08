@@ -45,7 +45,7 @@ behaviour = behaviourParser(behaviourPath, mouse);
 
 % the type of behaviour of interest - currently: habituation,
 % discrimination, recognition imaging stimulation, imaging discrimination,
-task = 'imaging_discrimination';
+task = 'habituation';
 
 %plot the behaviour of interest
 pc = behaviourPlotter(behaviour, task);
