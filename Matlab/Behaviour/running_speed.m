@@ -1,4 +1,4 @@
-function [speed, mid_time_bin] = running_speed(behavioural_data)
+function [binCounts,mid_time_bin] = running_speed(behavioural_data)
 
 % function to parse the running speed of the mouse based on the time
 % bins at which the mouse is recorded as moving forwards
@@ -11,43 +11,43 @@ while 1
 try
     running_forward = behavioural_data.running_forward;
 catch
-    speed = 0;
-    mid_time_bin = 0;
+    binCounts = 0;
+    binEdges = 0;
     break
 end
 
 if isempty(running_forward)
-    speed = 0;
-    mid_time_bin = 0;
+    binCounts = 0;
+    binEdges = 0;
     break
 end 
 
-running_forward = reshape(running_forward,1, numel(running_forward));
+% the times in seconds at which running was reported
+running_forward = running_forward/1000; 
 
-running_forward = running_forward/1000; %turn data from ms to s
-
-end_of_session = ceil(running_forward(end)); %duration of session in s
+% the length of the behavioural session in seconds
+lenSession = ceil(behavioural_data.session_length / 1000);
 
      
-time_bins= 10; %duration of time bins in s
+time_bins= 7; %duration of time bins in s
 radius_wheel=12; %radius of the wheel in cm
 
-L=(1:time_bins:(end_of_session-time_bins)); %start of the time bin
-U=((1+time_bins):time_bins:end_of_session); %end of time bin
-mid_time_bin=double((L+U)/2);
+binEdges = 0:time_bins:lenSession;
 
-forwards_count=[]; %number of 3.6 degres steps for each time bin
+histy = histogram(running_forward,binEdges);
+binCounts = histy.BinCounts;
 
-for ii= 1: length(L)
-    count_timings= running_forward(running_forward>=L(ii) & running_forward<U(ii)); %list occurrances in each time bin
-    total_count= length(count_timings); %number of occurrances for each time bin
-    forwards_count = [forwards_count; total_count];%total list of how many 'going_forward' events happened in every time bin (i.e. every 10sec)
+for i = 1:length(binEdges) -1
+    mid_time_bin(i) = (binEdges(i) + binEdges(i+1)) / 2;
 end
 
-angular_speed_deg=(forwards_count*3.6)/time_bins; % speed is calculated here as degrees every sec
-angular_speed_rad=angular_speed_deg*(2*pi)/360; %radians per second
-speed = double(angular_speed_rad*radius_wheel); %speed (cm/s)
 
+
+% 
+% 
+% angular_speed_deg=(forwards_count*3.6)/time_bins; % speed is calculated here as degrees every sec
+% angular_speed_rad=angular_speed_deg*(2*pi)/360; %radians per second
+% speed = double(angular_speed_rad*radius_wheel); %speed (cm/s)
 break
 
 end

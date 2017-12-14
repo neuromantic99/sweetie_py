@@ -110,99 +110,79 @@ elseif strcmp(task, 'imaging_stimulation') || strcmp(task, 'imaging_discriminati
             
         end
     end
+    
+
+elseif contains(task, 'habituation')
+    
+    close all
+    tot_water_deliveries = [];
+    figcount = 1;
+    % loads of variables are redefined here but i couldnt be bothered
+    % to come up with new names
+    for t = 1:2
+        task = tasklist{t};
+        allSessions = behav.(task);
+        dates = fieldnames(allSessions);
+        numSessions = length(dates);
         
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        elseif contains(task, 'habituation')
+        for i=1:numSessions
+            figcount = figcount+1;
+            session = allSessions.(dates{i});
             
-            close all
-            tot_water_deliveries = [];
-            figcount = 1;
-            % loads of variables are redefined here but i couldnt be bothered
-            % to come up with new names
-            for t = 1:2
-                task = tasklist{t};
-                allSessions = behav.(task);
-                dates = fieldnames(allSessions);
-                numSessions = length(dates);
-                
-                
-                for i=1:numSessions
-                    figcount = figcount+1;
-                    session = allSessions.(dates{i});
-                    
-                    mid_time_bin = session.mid_time_bin;
-                    speed = session.speed;
-                    
-                    figure(figcount), hold on
-                    plot(mid_time_bin,speed,'k');
-                    xlabel('time (s)')
-                    ylabel ('speed (cm/s)')
-                    if strcmp(task, 'habituation_fd')
-                        title (strcat({'Habituation First Day'}, {' '}, {int2str(figcount - 1)}))
-                    else
-                        title (strcat({'Habituation Day'},{' '}, {int2str(figcount - 1)}))
-                    end
-                    
-                    licks = session.licks;
-                    water_delivered = session.water_delivered;
-                    
-                    y_values_licks = ones (1,length(licks)) * 5; %plot licks always at 5 on the y axis.
-                    y_values_water = ones (1,length(water_delivered)) * 5.2; %plot water rewards always at 5.2 on the y axis.
-                    figure(figcount); hold on
-                    plot(licks, y_values_licks, '.r')
-                    plot(water_delivered, y_values_water, '.b')
-                    
-                    % only count the total number of water deliveries
-                    if strcmp(task, 'habituation')
-                        % the total number of water deliverys across sessions
-                        tot_water_deliveries=[tot_water_deliveries length(water_delivered)];
-                    end
-                    
-                end
-                
+            mid_time_bin = session.mid_time_bin;
+            speed = session.speed;
+            
+            figure(figcount), hold on
+            plot(mid_time_bin,speed,'k');
+            xlabel('time (s)')
+            ylabel ('speed (cm/s)')
+            if strcmp(task, 'habituation_fd')
+                title (strcat({'Habituation First Day'}, {' '}, {int2str(figcount - 1)}))
+            else
+                title (strcat({'Habituation Day'},{' '}, {int2str(figcount - 1)}))
             end
             
-            proportion_over_sessions = [];
-            max_water=max(tot_water_deliveries);
+            licks = session.licks;
+            water_delivered = session.water_delivered;
             
-            for i=1:length(tot_water_deliveries)
-                proportion_over_sessions=[proportion_over_sessions (tot_water_deliveries(i)*100/max_water)];
+            y_values_licks = ones (1,length(licks)) * 5; %plot licks always at 5 on the y axis.
+            y_values_water = ones (1,length(water_delivered)) * 5.2; %plot water rewards always at 5.2 on the y axis.
+            figure(figcount); hold on
+            plot(licks, y_values_licks, '.r')
+            plot(water_delivered, y_values_water, '.b')
+            
+            % only count the total number of water deliveries
+            if strcmp(task, 'habituation')
+                % the total number of water deliverys across sessions
+                tot_water_deliveries=[tot_water_deliveries length(water_delivered)];
             end
             
-            figure(1)
-            plot (proportion_over_sessions, '-o','Color','b', 'MarkerSize', 10)
-            set(gca,'ylim', [-10 110], 'xlim', [0 numSessions+1]);
-            xlabel('session (day)')
-            ylabel ('% of water in best session')
-            title('Performance over days - habituation only')
-            percentCorrect = [];
-            
+        end
+        
     end
     
+    proportion_over_sessions = [];
+    max_water=max(tot_water_deliveries);
+    
+    for i=1:length(tot_water_deliveries)
+        proportion_over_sessions=[proportion_over_sessions (tot_water_deliveries(i)*100/max_water)];
+    end
+    
+    figure(1)
+    plot (proportion_over_sessions, '-o','Color','b', 'MarkerSize', 10)
+    set(gca,'ylim', [-10 110], 'xlim', [0 numSessions+1]);
+    xlabel('session (day)')
+    ylabel ('% of water in best session')
+    title('Performance over days - habituation only')
+    percentCorrect = [];
+    
+end
+
     function yaxis = rasterY(x)
-    yaxis = ones(1,length(x));
+        yaxis = ones(1,length(x));
     end
-    
+
 end
 
 

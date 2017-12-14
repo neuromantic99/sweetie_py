@@ -1,0 +1,29 @@
+mtb = i.date_2017_12_07.area5.session_behaviour.mid_time_bins;
+re = i.date_2017_12_07.area5.session_behaviour.runEvents;
+
+flu = i.date_2017_12_07.area5.plane1.fluoresence_corrected;
+
+mFlu = nanmean(flu);
+
+nFrames = length(f);
+
+maxSecs = nFrames / i.date_2017_12_07.area5.plane1.fRate;
+
+
+close all
+
+nPlots = 10;
+
+for i = 1:nPlots
+
+    subplot(11,1,i)
+    plot(linspace(0,maxSecs,length(mFlu)),flu(i,:))
+    set(gca, 'xlim', [0,maxSecs])
+    
+    subplot(11,1,nPlots+1)
+    plot(mtb,re)
+    set(gca, 'xlim', [0,maxSecs])
+    
+    
+    
+end

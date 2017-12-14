@@ -36,22 +36,20 @@ for i = 1:length(allMats)
     end
     
     % parse the raw data to the running speed algorithm
-    [speed, mid_time_bin] = running_speed(raw);
+    [runEvents, mtb] = running_speed(raw);
     
     % save running data in the allSessions structure
-    allSessions.(sessionType).(date).speed = speed;
-    allSessions.(sessionType).(date).mid_time_bin = mid_time_bin';
+    allSessions.(sessionType).(date).runEvents = runEvents;
+    allSessions.(sessionType).(date).mid_time_bins = mtb;
 
     try
         water_delivered = raw.water_delivered;
-        water_delivered = water_delivered/1000; % convert to ms
     catch
         disp(['no water delivered field for ' mouse ' ' session.name]) 
     end
     
     try
         licks = raw.licks;
-        licks=licks/1000; %convert to ms
     catch
         disp(['no lick field for ' mouse ' ' session.name]) 
     end
@@ -69,15 +67,12 @@ for i = 1:length(allMats)
         
         % filthy way of adding the area field to imaging behaviour only
         tempStruct.(date).(area) = allSessions.(sessionType).(date);
-        allSessions.(sessionType) = tempStruct;
-        
-        
+        allSessions.(sessionType) = tempStruct;        
         
     else
         area = 'area_not_found';      
     end
-    %keyboard
-    
+
 end
 
 max_water=max(tot_water_deliveries);
@@ -91,19 +86,5 @@ allSessions.proportion_over_sessions = proportion_over_sessions;
 allSessions.tot_water_deliveries = tot_water_deliveries;
 
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

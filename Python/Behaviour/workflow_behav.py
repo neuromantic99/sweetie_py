@@ -22,12 +22,13 @@ def initialise(fPath):
     txtFiles = getTxtFiles(fPath)
 
     for txtFile in txtFiles:
-       
-        try:
-            runWorkflow(txtFile, outPath)
-        except (StopIteration, UnicodeDecodeError):
-            print('blank txt files in directory')
-            continue
+        #this allows you to add 'pass' to a behavioural file's name so it wont be processed
+        if 'pass' not in txtFile:      
+            try:
+                runWorkflow(txtFile, outPath)
+            except (StopIteration, UnicodeDecodeError):
+                print('blank txt files in directory')
+                continue
     
 
 def runWorkflow(txtFile, outPath):
@@ -36,7 +37,7 @@ def runWorkflow(txtFile, outPath):
     my_session = pc.Session(txtFile, False)
 
     # get the meta data from the header of the txt file
-    [ID, date, sessionType, go_pos] = getMetaData(my_session)
+    [ID, date, sessionType, go_pos, maxi] = getMetaData(my_session)
         
     # create the dictionary 'dictOut' which will be saved as a .mat file
     # this requires running the appropriate functions for the type of training
@@ -66,8 +67,7 @@ def runWorkflow(txtFile, outPath):
         dictOut = flavourInfo
         return
         
-    
-     
+      
 
     else:
         # get basic information required in all behaviours in the BSB 
@@ -83,12 +83,12 @@ def runWorkflow(txtFile, outPath):
             discrim = getDiscrimination(my_session, go_pos)
             dictOut = {**basicInfo, **training, **discrim}
             
-            
-            
+       
     # add the metadata to the dictionary
     dictOut['ID'] = ID
     dictOut['date'] = date
     dictOut['sessionType'] = sessionType
+    dictOut['session_length'] = maxi
 
     #sometimes the mouse doesnt run at all which will return None value
     #in the dictionary, scipy cannot make this into a mat, so replace it
@@ -121,17 +121,12 @@ def getMetaData(my_session):
     go_pos = 'None'
     
     name = my_session.experiment_name
-    
-    # find the task the mouse did corresponding to the text file.
-    # call the function relevant to that task 
-    if 'habituation' in name:
-        if 'firstday'  in name:
-            sessionType = 'habituation_fd'
-        else:
-            sessionType = 'habituation'
+    try:
+        maxi = max([float(line.split()[0]) for line in my_session.print_lines])
+    except ValueError:
+        maxi = 0
         
-    
-    elif '2p' in name:
+    if '2p' in name:
         if 'whiskerstim' in name or 'naive_norun' in name:
             sessionType = 'imaging_stimulation'
         
@@ -149,7 +144,17 @@ def getMetaData(my_session):
             #go_pos = getGoPos(my_session)
         else:
             raise ValueError('unknown imaging behaviour %s' %my_session.file_name)
+             
+    
+    # find the task the mouse did corresponding to the text file.
+    # call the function relevant to that task 
+    elif 'habituation' in name:
+        if 'firstday'  in name:
+            sessionType = 'habituation_fd'
+        else:
+            sessionType = 'habituation'
         
+       
         
     elif 'training' in my_session.experiment_name:
         if 'position' in my_session.experiment_name:
@@ -158,16 +163,11 @@ def getMetaData(my_session):
         else:     
             sessionType = 'recognition'
             
-
-    
-    
+  
     else:
         raise ValueError('Could not assign task to text file %s' % my_session.file_name)
 
-
-    
-         
-    return ID, date, sessionType, go_pos
+    return ID, date, sessionType, go_pos, maxi
 
 def getGoPos(my_session):
     
@@ -191,7 +191,6 @@ def getGoPos(my_session):
         raise ValueError ('failed to find GO position in file %s' % my_session.file_name)
        
     return go_pos
-    
     
    
 def searchPrintLines(my_session, I):
@@ -218,8 +217,6 @@ def getBasicInfo(my_session):
    
     return basicInfo
 
-
-        
 
 def getTraining(my_session):
         
@@ -272,7 +269,8 @@ def getImagingInfo(my_session):
     imInfo['running_backward'] = my_session.times.get('moonwalking mouse')
     #couldnt use 'searchPrintLines' for this because of the conflicting for 'going'
     imInfo['motor_start'] = [float(line.split()[0]) for line in my_session.print_lines if 'going forward' in line]
-
+    imInfo['initial_trials'] = [float(line.split()[0]) for line in my_session.print_lines if 'end of initial trial' in line]
+    
     # function that subtracts the start time of imaging from other times 
 
     norm = lambda t: [x - tS for x in t]
@@ -280,7 +278,6 @@ def getImagingInfo(my_session):
     # subtract tstart from times in dictionary
     
     imInfo = {key: norm(val) for key, val in imInfo.items() if type(val) is list or type(val) is np.ndarray}
-    
 
     # save tStart for future calculations
     imInfo['tStart'] = tS
@@ -309,14 +306,10 @@ def getFlavourInfo(my_session):
     else:
         pass
 
-  
-    
-    
-    
+   
     return flavInfo
     
 
-    
 
 def saveMatStruct(dictOut, outPath, ID, sessionType, date):
     
@@ -338,9 +331,7 @@ def saveMatStruct(dictOut, outPath, ID, sessionType, date):
         area = dictOut['area']
     else:
         area = ''
-        
-    print(savePath + sessionType + '_' + date + area + '.mat')
-    
+
     #save the dictionary as a matlab structure in the mouse folder
     sio.savemat(savePath + sessionType + '_' + date + area + '.mat',{'behavioural_data':dictOut}) 
 

@@ -6,7 +6,7 @@ fPath= [fPath mouse '/'];
 allMats = dir([fPath  '**/*proc.mat']);
 % create the structure to hold processed imaging data
 imaging = {};
-    
+
 for i = 1:length(allMats)
     
     % load the dat file from an imaging session
@@ -27,7 +27,7 @@ for i = 1:length(allMats)
     
     % get the area number - stored as the 'expts' variable in the ops file
     region = dat.ops.expts;
-    
+    %keyboard
     % get the date the imaging was performed
     date = dat.ops.date;
     
@@ -55,18 +55,13 @@ for i = 1:length(allMats)
         if dat.stat(kk).iscell
             
             counter = counter + 1;
-            
-            %maris code to represent spike times as a binary vector
-            %spike_timings=zeros(1,length(dat.Fcell{:}));
-            %spike_timings(dat.stat(kk).st)= dat.stat(kk).c;
-            
-            %jims code to not do that (change horrible try loop)
+
             try
                 spike_timings = dat.stat(kk).st;
                 spike_amps = dat.stat(kk).c;
             catch
-                spike_timings = [];
-                spike_amps = [];
+                 spike_timings = [];
+                 spike_amps = [];
             end
             
             
