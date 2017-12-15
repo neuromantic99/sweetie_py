@@ -3,13 +3,13 @@ session = im.date_2017_12_13.area1;
 mtb = session.session_behaviour.mid_time_bins;
 re = session.session_behaviour.runEvents;
 
-flu = session.plane1.fluoresence_corrected;
+flu = session.plane2.fluoresence_corrected;
 
 mFlu = nanmean(flu);
 
 nFrames = length(flu);
 
-maxSecs = nFrames / session.plane1.fRate;
+maxSecs = nFrames / session.plane2.fRate;
 
 
 close all
@@ -24,7 +24,7 @@ for i = 1:nPlots
     
     s2 = subplot(nPlots+1,1,nPlots+1);
     plot(mtb,re)
-    set(gca, 'xlim', [0,maxSecs], 'ytick', [], 'xtick', [])
+    set(gca, 'xlim', [0,maxSecs], 'xtick', [])
 
     
 end

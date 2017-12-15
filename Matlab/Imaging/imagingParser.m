@@ -105,7 +105,7 @@ for i = 1:length(allMats)
     % corresponding to the area (region) and plane
     imaging.(dateStr).(regionStr).(planeStr).raw_fluoresence = dat.Fcell;
     imaging.(dateStr).(regionStr).(planeStr).raw_neuropil = dat.FcellNeu;
-   % imaging.(dateStr).(regionStr).(planeStr).spike_timings = all_spike_times;
+    imaging.(dateStr).(regionStr).(planeStr).spike_timings = all_spike_times;
     imaging.(dateStr).(regionStr).(planeStr).spike_amps = all_spike_amps;
     
     imaging.(dateStr).(regionStr).(planeStr).fluoresence_corrected = dFoF;

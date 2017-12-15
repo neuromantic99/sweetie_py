@@ -7,8 +7,7 @@ function imaging = timeSeries(imaging, behaviour)
 % hence this will not overlap with other trials
 % in the passive stimulation case
 
-% set the time before and after whisker stim that the trial starts
-% seconds
+% set the time before and after that the trial starts
 tBefore = 1;
 tAfter = 3;
 disp(['using a trial length of ' num2str(tBefore + tAfter) ' seconds'])
@@ -57,28 +56,28 @@ for i = 1:length(dates)
         % create a single list showing the outcome of trials
         % difficult to use the motor forward times as these generated
         % can occur up to 5 seconds before the trial result is printed
-        
+     
         % create a 2d cell with the trial type as a string and the
         % timings of the trial
-        
+
         if isfield(behav, 'correct_trials')
             ct = dupMat(behav.correct_trials, 'correct');
             mt = dupMat(behav.missed_trials, 'missed');
             fp = dupMat(behav.falsepositive_trials, 'falsePositive');
             cr = dupMat(behav.correctrejection_trials,'correctRejection');
             it = dupMat(behav.initial_trials, 'initial');
-            
+
             allTrials = horzcat(ct,mt,fp,cr,it);
-            
+
             % sort all trials by their timings
             [~, idx] = sort(cell2mat(allTrials(1,:)));
             allTrials = allTrials(:,idx);
-            
+
             % append the trial type information to the imaging behaviour
             % structure
             imaging.(date).(area).(behavName{1}).trialType = string(allTrials(2,:));
         end
-        
+
         % the start of the trial (in frames) indicted by the start of the motor
         tStart = behav.motor_start;
         
@@ -112,7 +111,7 @@ for i = 1:length(dates)
             tBtSt = {};
             tBtAmps = {};
             for t = 1:length(tStart)
-                
+                                
                 % the time of each motor start
                 motor = tStart(t);
                 
@@ -122,30 +121,29 @@ for i = 1:length(dates)
                 frameAfter = floor(tAfter * fRate);
                 
                 % loop to throw out trials that finish after the end of
-                % imaging
+                % imaging  
                 
                 if motor + frameAfter > length(fluro(1,:))
                     continue
                 else
                     try
                         tBtFlu(t,:,:) = fluro(:,(motor - frameBefore):(motor + frameAfter));
-                    catch
-                        warning('probably got a proc file with no cells!!')
-                        continue
-                    end
-                   
-                    for unit = 1:length(st)
-                        
-                        % split the spike timings by trial (havent yet built
-                        % in the 4 seconds thing from above
-                        u = st{unit};
-                        a = amps{unit};
-                        idx = find(u >= (motor - frameBefore) & u <= (motor + frameAfter));
-                        tBtSt{unit,t} = u(idx) - (motor - frameBefore);
-                        
-                        tBtAmps{unit, t} = a(idx);
-                        
-                    end
+                    except
+                    
+                end
+                           
+             
+                for unit = 1:length(st)
+                    
+                    % split the spike timings by trial (havent yet built
+                    % in the 4 seconds thing from above
+                    u = st{unit};
+                    a = amps{unit};
+                    idx = find(u >= tStart(t) & u <= tStart(t+1));
+                    tBtSt{unit,t} = u(idx) - tStart(t);
+                    
+                    tBtAmps{unit, t} = a(idx);
+                    
                 end
             end
             
@@ -174,14 +172,14 @@ end
 % an extra dimension of tType
 function m = dupMat(x, tType)
 
-if isempty(x)
-    m = [];
-end
+    if isempty(x)
+        m = [];
+    end
 
-for matP = 1:length(x)
-    m{1,matP} = x(matP);
-    m{2,matP} = tType;
-end
+    for matP = 1:length(x)
+        m{1,matP} = x(matP);
+        m{2,matP} = tType;
+    end
 
 
 end

@@ -28,12 +28,12 @@ behaviourPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/';
 savePath = '/home/jamesrowland/Documents/ProcessedData/';
 
 %make apprporiate subfolders if they dont exist
-if ~exist([savePath '/ca-data-large/'])
-    mkdir([savePath '/ca-data-large/'])
+if ~exist([savePath '/imaging/'])
+    mkdir([savePath '/imaging/'])
 end
 
-if ~exist([savePath '/fullStructuresBehaviour/'])
-    mkdir([savePath '/fullStructuresBehaviour/'])
+if ~exist([savePath '/behaviour/'])
+    mkdir([savePath '/behaviour/'])
 end
 
 fNameImaging = [savePath '/ca-data-large/' mouse '.mat'];
@@ -43,14 +43,16 @@ fNameBehaviour = [savePath '/fullStructuresBehaviour/' mouse '.mat'];
 imaging = imagingParser(imagingPath, mouse);
 behaviour = behaviourParser(behaviourPath, mouse);
 
-% use behaviourPlotter to plot raster plots of behaviour
-% task should be set to the behaviour of interest e.g. 'habituation'
+% the type of behaviour of interest - currently: habituation,
+% discrimination, recognition imaging stimulation, imaging discrimination,
+task = 'imaging_discrimination';
 
-%task = 'imaging_discrimination';
+%plot the behaviour of interest
 %pc = behaviourPlotter(behaviour, task);
 
 % save behavioural data to structure
 save(fNameBehaviour, 'behaviour');
+
 
 % shift the imaging behaviour into the imaging structure, allign to the
 % behaviour and generate time series trial by trial data.

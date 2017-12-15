@@ -51,7 +51,7 @@ def runWorkflow(txtFile, outPath):
     elif sessionType == 'imaging_discrimination' or sessionType == 'imaging_detection':
         imInfo = getImagingInfo(my_session)        
         tS = imInfo['tStart'] #start time of the imaging
-        
+
         training = getTraining(my_session)
        
         # function that subtracts the start time of imaging from other times 
@@ -94,6 +94,7 @@ def runWorkflow(txtFile, outPath):
     #in the dictionary, scipy cannot make this into a mat, so replace it
     #with a suitable string
     for key, value in dictOut.items():
+
          if value is None:
              dictOut[key] = 'No Values Found'
 
@@ -261,8 +262,8 @@ def getImagingInfo(my_session):
         tS = my_session.times.get('TTL_in')[0]
     except:
         tS = []
-        print('blank imaging session txt files in directory')
-    
+        print('could not find a trigger for the imaging session %s ' %my_session.file_name)
+
     imInfo['licks'] =  searchPrintLines(my_session, 'lick')
     imInfo['water_delivered'] = searchPrintLines(my_session, 'waterON')
     imInfo['running_forward'] =  my_session.times.get('running mouse')
