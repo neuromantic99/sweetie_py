@@ -1,10 +1,6 @@
 
 # Kohl lab pipeline for processing suite2p imaging data and pyControl behaviour  
 
-The code requires the pyControl data_import.py module availble at: https://bitbucket.org/takam/pycontrol/src/default/tools/data_import.py?fileviewer=file-view-default
-
-This is imported as readPyControl in workflow_behav.
-
 To use the pipeline, first run workflow_behav setting the file paths as detailed in the comments.
 
 Next run the matlab function 'pipeline' giving a mouse name as an argument and again setting the file paths as detailed in the comments.
@@ -15,6 +11,8 @@ The output of pipeline is two structures: imaging and behaviour.
 The behaviour structure contains information about all the behaviour not aquired during imaging.
 
 The imaging structure contains information about both imaging (planeN) and the behaviour (session_behaviour) that was recorded during that imaging session. 
+
+The functions from readPyControl.py in this repository are based on the data_import.py module availble at: https://bitbucket.org/takam/pycontrol/src/default/tools/data_import.py?fileviewer=file-view-default
 
 
 ## Data format in imaging structure:
