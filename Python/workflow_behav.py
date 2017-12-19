@@ -14,14 +14,15 @@ to a mouse and an individual matlab structure for each behavioural session
 
 '''
 
-fPath = '/media/jamesrowland/DATA/RawData/Behaviour/'
-outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/'
+fPath = '/media/jamesrowland/DATA/RawData/ANA'
+outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/ANA'
 
 
 def initialise(fPath):
     txtFiles = getTxtFiles(fPath)
 
     for txtFile in txtFiles:
+        print(txtFile)
         #this allows you to add 'pass' to a behavioural file's name so it wont be processed
         if 'pass' not in txtFile:      
             try:
@@ -62,10 +63,10 @@ def runWorkflow(txtFile, outPath):
         
         dictOut = {**training, **imInfo}
         
-    elif sessionType == 'flavour':
+    elif sessionType == 'imaging_flavour':
         flavourInfo = getFlavourInfo(my_session)
         dictOut = flavourInfo
-        return
+        
         
       
 
@@ -139,7 +140,7 @@ def getMetaData(my_session):
             
             
         elif 'flavour' in name:
-            sessionType = 'flavour'
+            sessionType = 'imaging_flavour'
             
             # leaving out the go-pos for now, check later
             #go_pos = getGoPos(my_session)

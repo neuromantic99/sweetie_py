@@ -42,29 +42,27 @@ for i = 1:length(allMats)
     allSessions.(sessionType).(date).runEvents = runEvents;
     allSessions.(sessionType).(date).mid_time_bins = mtb;
 
-    if isfield(raw, 'water_delivered')
+    try
         water_delivered = raw.water_delivered;
-          % the total number of water deliverys across sessions
-        tot_water_deliveries=[tot_water_deliveries length(water_delivered)];
-
-        
-        allSessions.(sessionType).(date).water_delivered = water_delivered;
-        
-    else
-        disp(['no water delivered field for ' mouse ' ' session.name])       
+    catch
+        disp(['no water delivered field for ' mouse ' ' session.name]) 
+        continue
     end
     
     try
         licks = raw.licks;
-        allSessions.(sessionType).(date).licks = licks;
     catch
         disp(['no lick field for ' mouse ' ' session.name]) 
     end
     
-  
+    % the total number of water deliverys across sessions
+    tot_water_deliveries=[tot_water_deliveries length(water_delivered)];
+    
+    allSessions.(sessionType).(date).licks = licks;
+    allSessions.(sessionType).(date).water_delivered = water_delivered;
     
     % get the area number and take out '0' so it matches with imaging
-    
+    k
     if isfield(raw, 'area')
         
         area = raw.area;

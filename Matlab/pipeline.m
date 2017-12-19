@@ -4,7 +4,7 @@ function [imaging, behaviour] = pipeline(mouse)
 % (behaviour and imaging about a mouse.
 
 % Requires the functions: behaviourParser, imagingParser, dF_percentile,
-% running_speed
+% running_speed, timeSeries and allign
 %
 % set 'imagingPath' as the path to where all the suite2p processed imaging
 % information is stored. Each mouse should have its own folder called after
@@ -45,7 +45,6 @@ behaviour = behaviourParser(behaviourPath, mouse);
 
 % use behaviourPlotter to plot raster plots of behaviour
 % task should be set to the behaviour of interest e.g. 'habituation'
-
 %task = 'imaging_discrimination';
 %pc = behaviourPlotter(behaviour, task);
 
@@ -56,8 +55,11 @@ save(fNameBehaviour, 'behaviour');
 % behaviour and generate time series trial by trial data.
 if iscell(imaging) == 0
     imaging = timeSeries(imaging, behaviour);   
-    save(fNameImaging, 'imaging');
+    save(fNameImaging, 'imaging', '-v7.3');
 end
+
+
+
 
 
 end

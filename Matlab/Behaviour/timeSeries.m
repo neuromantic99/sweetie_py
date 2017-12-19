@@ -80,7 +80,12 @@ for i = 1:length(dates)
         end
         
         % the start of the trial (in frames) indicted by the start of the motor
-        tStart = behav.motor_start;
+        if isfield(behav, 'motor_start')
+            tStart = behav.motor_start;
+        else
+            tStart = [];
+            
+        end
         
         
         for iii = 1:length(planes)
