@@ -270,7 +270,7 @@ def getImagingInfo(my_session):
     imInfo['running_forward'] =  my_session.times.get('running mouse')
     imInfo['running_backward'] = my_session.times.get('moonwalking mouse')
     #couldnt use 'searchPrintLines' for this because of the conflicting for 'going'
-    imInfo['motor_start'] = [float(line.split()[0]) for line in my_session.print_lines if 'going forward' in line]
+    imInfo['motor_start'] = [float(line.split()[0]) for line in my_session.print_lines if 'going forward' or 'motor at whiskers' in line]
     imInfo['initial_trials'] = [float(line.split()[0]) for line in my_session.print_lines if 'end of initial trial' in line]
     
     # function that subtracts the start time of imaging from other times 

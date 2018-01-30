@@ -27,10 +27,16 @@ for i = 1:length(allMats)
     
     % get the area number - stored as the 'expts' variable in the ops file
     region = dat.ops.expts;
-    %keyboard
+ 
     % get the date the imaging was performed
     date = dat.ops.date;
     
+    % the raw fluoresence of ROIs marked as cells
+    raw_fluo = [];
+    
+    % the raw neuropil of ROIs marked as cells
+    raw_np = [];
+        
     %Rois signal corrected for neuropil
     ROIs_corrected=[];
     dFoF=[];
@@ -64,10 +70,12 @@ for i = 1:length(allMats)
                  spike_amps = [];
             end
             
+            raw_fluo = [raw_fluo; (dat.Fcell{:}(kk,:))];
+            raw_np = [raw_np; dat.FcellNeu{:}(kk,:)];
             
             %subtract neuropil as in Chen, 2013-nature methods
-            ROIs_corrected=[ROIs_corrected; (dat.Fcell{:}(kk,:)-(dat.FcellNeu{:}(kk,:)*r_coefficient))];
-            
+            ROIs_corrected = [ROIs_corrected; (dat.Fcell{:}(kk,:)-(dat.FcellNeu{:}(kk,:)*r_coefficient))];
+           
             is_red_neuron=[is_red_neuron; dat.stat(kk).redcell];
             all_spike_times=[all_spike_times; spike_timings];
             all_spike_amps = [all_spike_amps; spike_amps];
@@ -103,8 +111,11 @@ for i = 1:length(allMats)
     
     % build the imaging structure with the dynamic field names
     % corresponding to the area (region) and plane
-    imaging.(dateStr).(regionStr).(planeStr).raw_fluoresence = dat.Fcell;
-    imaging.(dateStr).(regionStr).(planeStr).raw_neuropil = dat.FcellNeu;
+    % have taken out the raw fluoresence to lighten the size of the
+    % structure
+    
+    imaging.(dateStr).(regionStr).(planeStr).raw_fluoresence = raw_fluo;
+    imaging.(dateStr).(regionStr).(planeStr).raw_neuropil = raw_np;
     imaging.(dateStr).(regionStr).(planeStr).spike_timings = all_spike_times;
     imaging.(dateStr).(regionStr).(planeStr).spike_amps = all_spike_amps;
     
