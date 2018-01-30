@@ -60,7 +60,7 @@ for i = 1:length(bFields)
             % iterate through each field in the session
             f = session.(sFields{iii});
             
-            if ismember(sFields{iii}, {'motor_start','licks','water_delivered', 'running_forward', 'correct_trials','missed_trials','falsepositive_trials','correctrejection_trials','initial_trials', 'flavourA','flavourB'})
+            if isinteger(f)
                
                 
                 fSecs = f/1000; %convert from ms to s
