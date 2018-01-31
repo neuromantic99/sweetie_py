@@ -91,14 +91,42 @@ for i = 1:length(bFields)
         end
         
         % ditch the NaNs from the running speed - corresponding to speed
-        % recorded before the start of imaging
-        preT = isnan(session.velocityTime);
-        session.velocityTime(preT) = [];
-        session.velocity(preT) = [];
-               
-        %also remove the veloicites from the end of imaging
-        session.velocity = session.velocity(1:length(session.velocityTime));
+        % recorded before the start of imaging    
+        vel = session.velocity;
+        vel_time = session.velocityTime;
         
+        pre_time = isnan(vel_time);
+        
+        vel_time(pre_time) = [];
+        vel(pre_time) = [];
+        
+        %also remove the veloicites from the end of imaging
+        vel =  vel(1:length(vel_time));
+        
+        velBinned = cell(max(vel_time),1);
+        
+        
+        
+        % bin the velocities by frame and take a mean. Giving the 
+        % avergae speed (steps / second) of the mouse across the frame
+        
+        for samp = 1:length(vel)
+            % the frame index it belongs to
+            fIND = vel_time(samp);
+            
+            velBinned{fIND} = [velBinned{fIND} vel(samp)];
+        end
+            
+        for bin = 1:length(velBinned)
+            
+            velBinned{bin} = mean(velBinned{bin});
+        end
+        
+        velBinned = cell2mat(velBinned);
+        
+        session.velocity = velBinned;
+        session = rmfield(session,'velocityTime');
+
         %trim the motor behaviour so it only reflects full trials
         numTrials = length(session.motor_atOrigin) - 1;
         session.motor_start = session.motor_start(1:numTrials);
@@ -108,7 +136,12 @@ for i = 1:length(bFields)
         session.stim_speed = session.stim_speed(1:numTrials,:);
         
         
-  
+        
+        
+        
+        
+        
+        
         
         %append to the imaging structure
         imaging.(date).(areas{ii}).session_behaviour = session;

@@ -109,7 +109,7 @@ def getTTL(my_session):
 
 
 def subTTL(dic,tS):
-    print(tS)
+
     # function that subtracts the start tS (TTL_in) from times in dictionary 'dic'         
     for key, val in dic.items():
         val = np.array(val)
@@ -191,10 +191,10 @@ def saveMatStruct(dictOut, outPath):
 
 
 # use this to debug
-t = '/media/jamesrowland/DATA/RawData/Behaviour/2018/GTRS1.5d_area01-2018-01-26-154446.txt'
-do = runWorkflow(t, outPath)
+#t = '/media/jamesrowland/DATA/RawData/Behaviour/2018/GTRS1.5d_area01-2018-01-26-154446.txt'
+#do = runWorkflow(t, outPath)
   
-#initialise(fPath, outPath)
+initialise(fPath, outPath)
 
 
 
