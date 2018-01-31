@@ -22,8 +22,6 @@ for i = 1:length(allMats)
     %split the running matrix to seperate fields
     raw.velocity = raw.running(:,2);
     raw.velocityTime = raw.running(:,1);
-    raw = rmfield(raw,'running');
-    
     
     %make the date into a valid structure field name
     date = strrep(date,'-','_');

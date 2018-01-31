@@ -40,6 +40,7 @@ def runWorkflow(txtFile, outPath):
 
     # get the meta data from the header of the txt file
     mData = getMetaData(my_session)
+
         
     # create the dictionary 'dictOut' which will be saved as a .mat file
     # this requires running the appropriate functions for the type of training
@@ -48,7 +49,7 @@ def runWorkflow(txtFile, outPath):
     if mData['task'] == 'sensory_stimulation':
         dictOut = getSensoryStim(my_session)
         
-    # add the metadata to the dictionary
+    # compile relevant dictionaries 
     dictOut = {**mData, **dictOut}
 
     saveMatStruct(dictOut, outPath)
@@ -87,7 +88,7 @@ def getMetaData(my_session):
     aIND = ID.find('area')
     
     
-    
+    # get the area string
     if aIND != -1:
         mData['area'] = ID[aIND:aIND+6]
     else:
@@ -108,32 +109,35 @@ def getTTL(my_session):
 
 
 def subTTL(dic,tS):
-    
+    print(tS)
     # function that subtracts the start tS (TTL_in) from times in dictionary 'dic'         
     for key, val in dic.items():
-        dic[key] = np.array(val) - tS 
+        val = np.array(val)
+        # only subtract the TTL from the running time stamp
+        if key == 'running':
+            val[:,0] = val[:,0] - tS
+            dic[key] = val
+        else:
+            dic[key] = val - tS 
     
     return dic
 
 
 def motor(my_session):
     # the motor starts moving
-    fStart = my_session.times.get('motor_forward')
     
+    mInfo = {}
+    
+    mInfo['motor_start'] = my_session.times.get('motor_forward')
     #the motor arrives at the whiskers
-    atWhiskers = my_session.times.get('stim_interval')
-
+    mInfo['motor_atWhisk'] = my_session.times.get('stim_interval')
     #the motor starts back
-    bStart = my_session.times.get('motor_backward')
+    mInfo['motor_back'] = my_session.times.get('motor_backward')
 
-    # I haven't added the time that the motor arrives back
-    # at the start position because it's the different
-    # depending on the task, but can be done
-    
-    # concatenate, taking into account that the behaviour may end half way
-    # through a trial
-    mInfo = np.vstack((fStart[0:len(bStart)], atWhiskers[0:len(bStart)], bStart))
-        
+    #the motor arrives back cut off first origin as this is start of session
+    if my_session.task_name == 'sensory_stimulation':
+        mInfo['motor_atOrigin'] = my_session.times.get('trial_start')
+                
     return mInfo
 
 def getRunning(my_session):
@@ -147,23 +151,23 @@ def getRunning(my_session):
     running = pc.load_analog_data(pca[0])
     
     return running
-    
 
+    
 
 def getSensoryStim(my_session):
     # return all the values that need TTL subtraction before the rest
     ssInfo = {}
     
     ssInfo['running'] = getRunning(my_session)
-    ssInfo['mInfo'] = motor(my_session)
-    
+    motInf = motor(my_session)
+    ssInfo = {**ssInfo, **motInf}
     # subtract the TTL time
     TTL = getTTL(my_session)
     ssInfo = subTTL(ssInfo, TTL)
     
-    # do not need TTL subtraction have left these as strings to prevent allignment to imaging in matlab
-    ssInfo['motor_position'] = [line.split()[5] for line in my_session.print_lines if 'whisker stim position is' in line]
-    ssInfo['motor_speed'] = [line.split()[3] for line in my_session.print_lines if 'speed is' in line]
+    # do not need TTL subtraction and have left these as strings to prevent allignment to imaging in matlab
+    ssInfo['stim_position'] = [line.split()[5] for line in my_session.print_lines if 'whisker stim position is' in line]
+    ssInfo['stim_speed'] = [line.split()[3] for line in my_session.print_lines if 'speed is' in line]
   
     return ssInfo
 
@@ -186,9 +190,39 @@ def saveMatStruct(dictOut, outPath):
     sio.savemat(savePath + dictOut['task'] + '_' + dictOut['date'] + '_' + dictOut['area'] + '.mat',{'behavioural_data':dictOut}) 
 
 
+# use this to debug
+t = '/media/jamesrowland/DATA/RawData/Behaviour/2018/GTRS1.5d_area01-2018-01-26-154446.txt'
+do = runWorkflow(t, outPath)
   
-initialise(fPath, outPath)
-    
+#initialise(fPath, outPath)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

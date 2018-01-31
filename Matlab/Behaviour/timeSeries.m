@@ -1,19 +1,10 @@
 function imaging = timeSeries(imaging, behaviour)
 
-
-% split the corrected flurosence by trial
-% this will yield the flurosence from one second before the
-% motor onset and three seconds after.
-% hence this will not overlap with other trials
-% in the passive stimulation case
-
-% set the time before and after whisker stim that the trial starts
-% seconds
-tBefore = 1;
-tAfter = 3;
-disp(['using a trial length of ' num2str(tBefore + tAfter) ' seconds'])
+% split the data by trial and generate list of string detailing
+% the information about the trial
 
 bFields = fieldnames(behaviour);
+
 % get the names of the imaging related behaviours
 behavNames = {};
 c = 0;
@@ -26,9 +17,6 @@ for i = 1:length(bFields)
 end
 
 
-
-
- 
 % if all the behaviours are not showing up, this is most likely the problem
 for i = 1:length(behavNames)
     imaging = allign(behaviour, imaging, behavNames{i});
@@ -90,13 +78,19 @@ for i = 1:length(dates)
             imaging.(date).(area).(behavName{1}).trialType = string(allTrials(2,:));
         end
         
+       
         % the start of the trial (in frames) indicted by the start of the motor
-        if isfield(behav, 'motor_start')
-            tStart = behav.motor_start;
+        if isfield(behav, 'motor_atOrigin')
+            tStart = behav.motor_atOrigin;
         else
-            tStart = [];
-            
+            tStart = [];            
         end
+        
+        % the imaging is quite likely to end half way through a trial
+        % at origin signals the end of a trial
+        % so the length of this variable is the number of full trials
+        numTrials = length(behav.motor_atOrigin) - 1;
+        
         
         
         for iii = 1:length(planes)
@@ -122,29 +116,25 @@ for i = 1:length(dates)
                 amps = [];
             end
             
-            tBtFlu = [];
-            
+                      
             %cells containing spike timings by each unit
             tBtSt = {};
             tBtAmps = {};
-            for t = 1:length(tStart)
+            tBtFlu = {};
+            for t = 1:numTrials
                 
-                % the time of each motor start
-                motor = tStart(t);
-                
-                % the number of frames to count before and after
-                % whisker stimulation
-                frameBefore =  floor(tBefore * fRate);
-                frameAfter = floor(tAfter * fRate);
-                
+                % the time of each trial start and end
+                t0 = tStart(t);
+                t1 = tStart(t+1);
+             
                 % loop to throw out trials that finish after the end of
                 % imaging
                 
-                if motor + frameAfter > length(fluro(1,:))
+                if t1 > length(fluro(1,:))
                     continue
                 else
                     try
-                        tBtFlu(t,:,:) = fluro(:,(motor - frameBefore):(motor + frameAfter));
+                        tBtFlu{t} = fluro(:,t0:t1);
                     catch
                         warning('probably got a proc file with no cells!!')
                         continue
@@ -152,27 +142,22 @@ for i = 1:length(dates)
                    
                     for unit = 1:length(st)
                         
-                        % split the spike timings by trial (havent yet built
-                        % in the 4 seconds thing from above
+                        % split the spike timings by trial 
                         u = st{unit};
                         a = amps{unit};
-                        idx = find(u >= (motor - frameBefore) & u <= (motor + frameAfter));
-                        tBtSt{unit,t} = u(idx) - (motor - frameBefore);
+                        idx = find(u >= t0 & u <= t1);
+                        tBtSt{unit,t} = u(idx) - t0;
                         
                         tBtAmps{unit, t} = a(idx);
                         
                     end
                 end
             end
-            
-            nTrials = t;
-            
-            nUnits = size(tBtFlu,2);
-            nFrames = size(tBtFlu,3);
-            
-            
-            comment = ['Dear Friedemann there are ' int2str(nTrials) ' trials, ' ...
-                int2str(nUnits) ' units and ' int2str(nFrames) ' frames'];
+                       
+            nUnits = size(tBtFlu{1},1);
+                        
+            comment = ['Dear Friedemann there are ' int2str(numTrials) ' trials, ' ...
+                int2str(nUnits) ' units and a variable number of frames'];
             
             %append to the imaging structure
             imaging.(date).(area).(plane).trialByTrialFlu = tBtFlu;

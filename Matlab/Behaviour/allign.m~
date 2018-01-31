@@ -95,20 +95,8 @@ for i = 1:length(bFields)
         preT = isnan(session.velocityTime);
         session.velocityTime(preT) = [];
         session.velocity(preT) = [];
-               
         %also remove the veloicites from the end of imaging
-        session.velocity = session.velocity(1:length(session.velocityTime));
-        
-        %trim the motor behaviour so it only reflects full trials
-        numTrials = length(session.motor_atOrigin) - 1;
-        session.motor_start = session.motor_start(1:numTrials);
-        session.motor_atWhisk = session.motor_atWhisk(1:numTrials);
-        session.motor_back = session.motor_back(1:numTrials);
-        session.stim_position = session.stim_position(1:numTrials,:);
-        session.stim_speed = session.stim_speed(1:numTrials,:);
-        
-        
-  
+        session.velocity = session.velocity(1:length(velocityTime));
         
         %append to the imaging structure
         imaging.(date).(areas{ii}).session_behaviour = session;
