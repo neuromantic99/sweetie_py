@@ -15,7 +15,7 @@ to a mouse and an individual matlab structure for each behavioural session
 
 '''
 
-fPath = '/media/jamesrowland/DATA/RawData/Behaviour/2018'
+fPath = '/media/jamesrowland/DATA/RawData/Behaviour/comb_test'
 outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/2018'
 
 
@@ -40,7 +40,6 @@ def runWorkflow(txtFile, outPath):
 
     # get the meta data from the header of the txt file
     mData = getMetaData(my_session)
-
         
     # create the dictionary 'dictOut' which will be saved as a .mat file
     # this requires running the appropriate functions for the type of training
@@ -90,22 +89,30 @@ def getMetaData(my_session):
     
     # get the area string
     if aIND != -1:
-        mData['area'] = ID[aIND:aIND+6]
+        area = ID[aIND:]
     else:
-        mData['area'] = ''
-     
+        area = ''
+        
+    mData['area'] = area
+        
+         
     return mData
 
 
 def getTTL(my_session):
-            
+
     try:
-        tS = my_session.times.get('TTL_in')[0]
+        tS = my_session.times.get('TTL_in')[0]        
     except:
         tS = []
         print('could not find a trigger for the imaging session %s ' %my_session.file_name)
         
-    return tS
+    try:
+        tEnd = my_session.times.get('TTL_out')[0] - tS
+    except:
+        tEnd = []
+        
+    return tS, tEnd
 
 
 def subTTL(dic,tS):
@@ -114,6 +121,7 @@ def subTTL(dic,tS):
     for key, val in dic.items():
         val = np.array(val)
         # only subtract the TTL from the running time stamp
+        
         if key == 'running':
             val[:,0] = val[:,0] - tS
             dic[key] = val
@@ -147,8 +155,14 @@ def getRunning(my_session):
     
     allPCAs = getFiles(my_session.file_path, '.pca')
     pca = [f for f in allPCAs if stamp in f]
-
-    running = pc.load_analog_data(pca[0])
+    
+    try:
+        running = pc.load_analog_data(pca[0])
+    except IndexError:
+        raise 'likely missing PCA files to match txt files' 
+    
+    # same format as read in txt file
+    running = running.astype(np.int64)
     
     return running
 
@@ -162,13 +176,16 @@ def getSensoryStim(my_session):
     motInf = motor(my_session)
     ssInfo = {**ssInfo, **motInf}
     # subtract the TTL time
-    TTL = getTTL(my_session)
+    TTL, endTTL = getTTL(my_session)
     ssInfo = subTTL(ssInfo, TTL)
+    
+    ssInfo['endTTL'] = endTTL
+    
     
     # do not need TTL subtraction and have left these as strings to prevent allignment to imaging in matlab
     ssInfo['stim_position'] = [line.split()[5] for line in my_session.print_lines if 'whisker stim position is' in line]
     ssInfo['stim_speed'] = [line.split()[3] for line in my_session.print_lines if 'speed is' in line]
-  
+    print(ssInfo['stim_position'])
     return ssInfo
 
 
@@ -191,10 +208,11 @@ def saveMatStruct(dictOut, outPath):
 
 
 # use this to debug
-#t = '/media/jamesrowland/DATA/RawData/Behaviour/2018/GTRS1.5d_area01-2018-01-26-154446.txt'
-#do = runWorkflow(t, outPath)
+t = '/media/jamesrowland/DATA/RawData/Behaviour/2018/GTRS1.5d_area01-2018-01-26-154446.txt'
+#t = '/media/jamesrowland/DATA/RawData/Behaviour/comb_test/testTTLout-2018-02-01-114116.txt'
+do = runWorkflow(t, outPath)
   
-initialise(fPath, outPath)
+#initialise(fPath, outPath)
 
 
 

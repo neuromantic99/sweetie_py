@@ -20,8 +20,8 @@ for i = 1:length(allMats)
     date = raw.date;
     
     %split the running matrix to seperate fields
-    raw.velocity = raw.running(:,2);
-    raw.velocityTime = raw.running(:,1);
+    raw.velocity = transpose(raw.running(:,2));
+    raw.velocityTime = transpose(raw.running(:,1));
     raw = rmfield(raw,'running');
     
     
@@ -40,7 +40,10 @@ for i = 1:length(allMats)
         allSessions.(task).(date).(fields{ii}) = raw.(fields{ii});
     end
     
-    
+    % if behavioral sessions need to be merged
+    if isletter(raw.area(end))
+        allSessions.merge = 1;
+    end
     
     
     

@@ -43,6 +43,8 @@ fNameBehaviour = [savePath '/fullStructuresBehaviour/2018/' mouse '.mat'];
 imaging = imagingParser(imagingPath, mouse);
 behaviour = behaviourParser(behaviourPath, mouse);
 
+
+
 % use behaviourPlotter to plot raster plots of behaviour
 % task should be set to the behaviour of interest e.g. 'habituation'
 %task = 'imaging_discrimination';

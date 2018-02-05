@@ -126,23 +126,31 @@ for i = 1:length(bFields)
         
         session.velocity = velBinned;
         session = rmfield(session,'velocityTime');
-
+        
+        % python workflow doens't like these character arrays
+        sp = session.stim_position;
+        for iiiii = 1:length(sp)
+            sps(iiiii) = str2double(sp(iiiii,:));
+        end
+        
+        ss = session.stim_speed;
+        for iiiii = 1:length(ss)
+            sss(iiiii) = str2double(ss(iiiii,:));
+        end
+        
+        
+        
+        
+        
         %trim the motor behaviour so it only reflects full trials
         numTrials = length(session.motor_atOrigin) - 1;
         session.motor_start = session.motor_start(1:numTrials);
         session.motor_atWhisk = session.motor_atWhisk(1:numTrials);
         session.motor_back = session.motor_back(1:numTrials);
-        session.stim_position = session.stim_position(1:numTrials,:);
-        session.stim_speed = session.stim_speed(1:numTrials,:);
+        session.stim_position = sps(1:numTrials);
+        session.stim_speed = sss(1:numTrials);
         
-        
-        
-        
-        
-        
-        
-        
-        
+     
         %append to the imaging structure
         imaging.(date).(areas{ii}).session_behaviour = session;
         

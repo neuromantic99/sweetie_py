@@ -3,6 +3,11 @@ function imaging = timeSeries(imaging, behaviour)
 % split the data by trial and generate list of string detailing
 % the information about the trial
 
+% check if behaviours need to be merged
+if isfield(behaviour, 'merge')
+    behaviour = merger(behaviour);
+end
+
 bFields = fieldnames(behaviour);
 
 % get the names of the imaging related behaviours
@@ -11,6 +16,8 @@ c = 0;
 for i = 1:length(bFields)
     
     if contains(bFields{i},'sensory') || contains(bFields{i}, 'imaging_')
+        
+        
         c = c +1;
         behavNames{c} = bFields{i};
     end
@@ -78,12 +85,12 @@ for i = 1:length(dates)
             imaging.(date).(area).(behavName{1}).trialType = string(allTrials(2,:));
         end
         
-       
+        
         % the start of the trial (in frames) indicted by the start of the motor
         if isfield(behav, 'motor_atOrigin')
             tStart = behav.motor_atOrigin;
         else
-            tStart = [];            
+            tStart = [];
         end
         
         % the imaging is quite likely to end half way through a trial
@@ -116,7 +123,7 @@ for i = 1:length(dates)
                 amps = [];
             end
             
-                      
+            
             %cells containing spike timings by each unit
             tBtSt = {};
             tBtAmps = {};
@@ -126,7 +133,7 @@ for i = 1:length(dates)
                 % the time of each trial start and end
                 t0 = tStart(t);
                 t1 = tStart(t+1);
-             
+                
                 % loop to throw out trials that finish after the end of
                 % imaging
                 
@@ -139,10 +146,10 @@ for i = 1:length(dates)
                         warning('probably got a proc file with no cells!!')
                         continue
                     end
-                   
+                    
                     for unit = 1:length(st)
                         
-                        % split the spike timings by trial 
+                        % split the spike timings by trial
                         u = st{unit};
                         a = amps{unit};
                         idx = find(u >= t0 & u <= t1);
@@ -153,9 +160,9 @@ for i = 1:length(dates)
                     end
                 end
             end
-                       
+            
             nUnits = size(tBtFlu{1},1);
-                        
+            
             comment = ['Dear Friedemann there are ' int2str(numTrials) ' trials, ' ...
                 int2str(nUnits) ' units and a variable number of frames'];
             
