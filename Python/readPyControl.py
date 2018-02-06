@@ -91,6 +91,11 @@ class Session():
                       for event_name in ID2name.values()}
 
         self.print_lines = [line[2:] for line in all_lines if line[0]=='P']
+        
+        # JR addition
+        self.merge_lines = [line for line in all_lines if line[0] == 'P' or line[0] == 'D']
+        
+        self.headers = [line for line in all_lines if line[0] == 'I' or line[0] == 'S' or line[0] == 'E']
 
 
 #----------------------------------------------------------------------------------

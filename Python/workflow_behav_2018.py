@@ -3,6 +3,8 @@ import scipy.io as sio
 import os
 import errno
 import numpy as np
+import merge as me
+
 
 
 '''
@@ -23,14 +25,19 @@ def initialise(fPath, outPath):
    
     txtFiles = getFiles(fPath, ".txt")
 
+    me.check_merge(txtFiles)
+    
     for txtFile in txtFiles:
         #this allows you to add 'pass' to a behavioural file's name so it wont be processed
         if 'pass' not in txtFile:      
             try:
                 runWorkflow(txtFile, outPath)
+                
             except (StopIteration, UnicodeDecodeError):
                 print('blank txt files in directory')
                 continue
+            
+
 
 
 def runWorkflow(txtFile, outPath):
@@ -154,12 +161,13 @@ def getRunning(my_session):
     stamp = txt.split('.txt')[0]
     
     allPCAs = getFiles(my_session.file_path, '.pca')
+   
     pca = [f for f in allPCAs if stamp in f]
     
     try:
         running = pc.load_analog_data(pca[0])
     except IndexError:
-        raise 'likely missing PCA files to match txt files' 
+        raise AssertionError('likely missing PCA files to match txt files' )
     
     # same format as read in txt file
     running = running.astype(np.int64)
@@ -185,7 +193,6 @@ def getSensoryStim(my_session):
     # do not need TTL subtraction and have left these as strings to prevent allignment to imaging in matlab
     ssInfo['stim_position'] = [line.split()[5] for line in my_session.print_lines if 'whisker stim position is' in line]
     ssInfo['stim_speed'] = [line.split()[3] for line in my_session.print_lines if 'speed is' in line]
-    print(ssInfo['stim_position'])
     return ssInfo
 
 
@@ -208,11 +215,11 @@ def saveMatStruct(dictOut, outPath):
 
 
 # use this to debug
-t = '/media/jamesrowland/DATA/RawData/Behaviour/2018/GTRS1.5d_area01-2018-01-26-154446.txt'
+#t = '/media/jamesrowland/DATA/RawData/Behaviour/2018/GTRS1.5d_area01-2018-01-26-154446.txt'
 #t = '/media/jamesrowland/DATA/RawData/Behaviour/comb_test/testTTLout-2018-02-01-114116.txt'
-do = runWorkflow(t, outPath)
+#do = runWorkflow(t, outPath)
   
-#initialise(fPath, outPath)
+initialise(fPath, outPath)
 
 
 

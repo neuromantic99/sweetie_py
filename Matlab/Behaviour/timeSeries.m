@@ -3,10 +3,6 @@ function imaging = timeSeries(imaging, behaviour)
 % split the data by trial and generate list of string detailing
 % the information about the trial
 
-% check if behaviours need to be merged
-if isfield(behaviour, 'merge')
-    behaviour = merger(behaviour);
-end
 
 bFields = fieldnames(behaviour);
 

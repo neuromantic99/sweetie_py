@@ -40,14 +40,6 @@ for i = 1:length(allMats)
         allSessions.(task).(date).(fields{ii}) = raw.(fields{ii});
     end
     
-    % if behavioral sessions need to be merged
-    if isletter(raw.area(end))
-        allSessions.merge = 1;
-    end
-    
-    
-    
-    
     % get the area number and take out '0' so it matches with imaging
     
     if length(raw.area) ~= 0
