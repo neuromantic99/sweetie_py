@@ -23,9 +23,11 @@ outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/2018'
 
 def initialise(fPath, outPath):
    
-    txtFiles = getFiles(fPath, ".txt")
+    checkMerge = getFiles(fPath, ".txt")
 
-    me.check_merge(txtFiles)
+    me.check_merge(checkMerge)
+    
+    txtFiles = getFiles(fPath, ".txt")
     
     for txtFile in txtFiles:
         #this allows you to add 'pass' to a behavioural file's name so it wont be processed

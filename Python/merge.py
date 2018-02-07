@@ -8,7 +8,7 @@ def check_merge(txtFiles):
     toMerge = []
     for txtFile in txtFiles:
         
-        if 'PREMERGE' in txtFile or 'IVE_BEEN_MERGED' in txtFile:
+        if 'IVE_BEEN_MERGED' in txtFile:
             continue
         
         my_session = pc.Session(txtFile, False)
@@ -61,7 +61,7 @@ def mergeIndex(mergeIND, toMerge):
         mergeIND = np.array(mergeIND)
         a = np.where(mergeIND == clust)[0]
         
-        mergeGroup = [txtFiles[b] for b in a]
+        mergeGroup = [toMerge[b] for b in a]
         
         doMergePCA(mergeGroup)
         doMerge(mergeGroup)
