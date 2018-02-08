@@ -114,12 +114,6 @@ def doMerge(mergeGroup):
     with open(fPath, 'w') as f:
         f.writelines(i + '\n' for i in header) 
 
-
-    #new names for old files
-    #newA = mergeGroup[0][:-4] + 'PREMERGE' + '.txt'
-    #newB = mergeGroup[1][:-4] + 'PREMERGE' + '.txt'
-    #rename the old txt files
-    
     os.remove(mergeGroup[0])
     os.remove(mergeGroup[1])
 
@@ -131,8 +125,6 @@ def doMergePCA(mergeGroup):
     tEnd = sessionA.times.get('TTL_out')[0] 
     # start of the second behaviour
     tStart = sessionB.times.get('TTL_in')[0]
-    global runA  
-    global runB
     
     for root, dirs, files in os.walk(sessionA.file_path):
         for file in files:

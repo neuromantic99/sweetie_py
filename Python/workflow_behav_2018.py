@@ -17,14 +17,15 @@ to a mouse and an individual matlab structure for each behavioural session
 
 '''
 
-fPath = '/media/jamesrowland/DATA/RawData/Behaviour/comb_test'
+fPath = '/media/jamesrowland/DATA/RawData/Behaviour/flav'
 outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/2018'
 
 
 def initialise(fPath, outPath):
    
+    
     checkMerge = getFiles(fPath, ".txt")
-
+    #check whether files need to be merged
     me.check_merge(checkMerge)
     
     txtFiles = getFiles(fPath, ".txt")
@@ -56,6 +57,9 @@ def runWorkflow(txtFile, outPath):
     
     if mData['task'] == 'sensory_stimulation':
         dictOut = getSensoryStim(my_session)
+    if 'flavour' in mData['task']:
+        dictOut = getFlavour(my_session)
+        
         
     # compile relevant dictionaries 
     dictOut = {**mData, **dictOut}
@@ -91,7 +95,7 @@ def getMetaData(my_session):
     mData['date'] = my_session.datetime_string.split()[0]
     
     mData['task'] = my_session.task_name
-    
+    print(mData['task'])
     # get area for imaging sessions    
     aIND = ID.find('area')
     
@@ -197,9 +201,23 @@ def getSensoryStim(my_session):
     ssInfo['stim_speed'] = [line.split()[3] for line in my_session.print_lines if 'speed is' in line]
     return ssInfo
 
+def getFlavour(my_session):
+    
+    flavInfo = {}
+    
+    #flavInfo['running'] = getRunning(my_session)
+    flavInfo['flavourA'] = [float(line.split()[0]) for line in my_session.print_lines if 'flavour' in line and line.split()[-1] == 'A']
+    flavInfo['flavourB'] = [float(line.split()[0]) for line in my_session.print_lines if 'flavour' in line and line.split()[-1] == 'B']
+    
+    TTL, endTTL = getTTL(my_session)
+    flavInfo = subTTL(flavInfo, TTL)
+    
+    return flavInfo
+
+    
 
 def saveMatStruct(dictOut, outPath):
-    
+
    # the path to the mouse specific folder
     savePath = outPath + '/' + dictOut['ID'] + '/'
      

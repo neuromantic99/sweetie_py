@@ -28,11 +28,7 @@ for i = 1:length(allMats)
     %make the date into a valid structure field name
     date = strrep(date,'-','_');
     date = strcat('date_', date);
-    
-    
-    
-    
-    
+  
     
     % add fields from the raw data structure to the new structure
     fields = fieldnames(raw);
