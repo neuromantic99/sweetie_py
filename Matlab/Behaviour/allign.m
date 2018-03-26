@@ -20,7 +20,8 @@ for i = 1:length(bFields)
     date = bFields{i};
     
     try
-        areas = fieldnames(imaging.(date));
+        %areas = fieldnames(imaging.(date));
+        areas = fieldnames(behav.(date));
     catch
         warning('Cannot find both the imaging and the behaviour from date  %s', date)
         continue
@@ -39,16 +40,21 @@ for i = 1:length(bFields)
             error('an error here most likely means the subject ID or the area of a file is incorrect')
         end
         
+        % this performs TTL subtraction and removes data from outside
+        % imaging.
+        session = bMerger(session);
+            
+        
         sFields = fieldnames(session);
-        
-%         preT = session.velocityTime<0;
-%         session.velocityTime(preT) = [];
-%         session.velocity(preT) = [];
-        
         
         
         % get the imaging session relevant to the behaviour
-        iFields = fieldnames(imaging.(date).(areas{ii}));
+        try
+            
+            iFields = fieldnames(imaging.(date).(areas{ii}));
+        catch
+            error('likely cannot find imaging to match behaviour')
+        end
         imSession = imaging.(date).(areas{ii}).(iFields{1});
         
         % get the frame rate of the imaging on each date in
@@ -66,20 +72,19 @@ for i = 1:length(bFields)
             % iterate through each field in the session
             f = session.(sFields{iii});
             
+            % im not entirely sure whether this is robust and whether
+            % future variables will be saved as integer or double, so
+            % please check the start of this loop.
+            
             if isinteger(f) && ~strcmp(sFields{iii}, 'velocity')
                 
                 % cannot do float divisions with int64
                 f = double(f);
-                
+
                 fSecs = f/1000; %convert from ms to s
                 
-                %remove behavioural data that occured
-                %after imaging stopped
-                highIND = find(fSecs>lenIm);
-                fSecs(highIND) = [];
-                
                 %bin the behavioural data by frame
-                edges  = linspace(0,lenIm,lenIm*fRate);
+                edges  = linspace(0,lenIm,lenIm*fRate + 1);
                 fBin = discretize(fSecs, edges);
                 
                 % change the session field to reflect fBin
@@ -89,32 +94,24 @@ for i = 1:length(bFields)
             end
             
         end
+
+       
+        % bin the velocities by frame and take a mean. Giving the 
+        % avergae speed (steps / second) of the mouse across the frame
         
-        % ditch the NaNs from the running speed - corresponding to speed
-        % recorded before the start of imaging    
         vel = session.velocity;
         vel_time = session.velocityTime;
         
-        pre_time = isnan(vel_time);
-        
-        vel_time(pre_time) = [];
-        vel(pre_time) = [];
-        
-        %also remove the veloicites from the end of imaging
-        vel =  vel(1:length(vel_time));
-        
         velBinned = cell(max(vel_time),1);
-        
-        
-        
-        % bin the velocities by frame and take a mean. Giving the 
-        % avergae speed (steps / second) of the mouse across the frame
         
         for samp = 1:length(vel)
             % the frame index it belongs to
             fIND = vel_time(samp);
-            
-            velBinned{fIND} = [velBinned{fIND} vel(samp)];
+            try
+                velBinned{fIND} = [velBinned{fIND} vel(samp)];
+            catch
+                keyboard
+            end
         end
             
         for bin = 1:length(velBinned)
@@ -138,21 +135,13 @@ for i = 1:length(bFields)
             sss(iiiii) = str2double(ss(iiiii,:));
         end
         
-        
-        
-        
-        
-        %trim the motor behaviour so it only reflects full trials
-        numTrials = length(session.motor_atOrigin) - 1;
-        session.motor_start = session.motor_start(1:numTrials);
-        session.motor_atWhisk = session.motor_atWhisk(1:numTrials);
-        session.motor_back = session.motor_back(1:numTrials);
-        session.stim_position = sps(1:numTrials);
-        session.stim_speed = sss(1:numTrials);
-        
      
         %append to the imaging structure
+        session.stim_speed = sss;
+        session.stim_position = sps;
+        
         imaging.(date).(areas{ii}).session_behaviour = session;
+
         
     end
     

@@ -49,9 +49,7 @@ class Session():
                   
             all_lines = [line.strip() for line in f.readlines() if line.strip()]
 
-            
-            
-            
+
         # utf-8 encoding generates weird string at start of document which needs to be removed
       
         all_lines = [line.replace(u'\ufeff', '') for line in all_lines]

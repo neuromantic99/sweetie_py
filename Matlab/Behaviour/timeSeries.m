@@ -9,11 +9,8 @@ bFields = fieldnames(behaviour);
 % get the names of the imaging related behaviours
 behavNames = {};
 c = 0;
-for i = 1:length(bFields)
-    
-    if contains(bFields{i},'sensory') || contains(bFields{i}, 'imaging_')
-        
-        
+for i = 1:length(bFields)  
+    if contains(bFields{i},'sensory') || contains(bFields{i}, 'imaging_')     
         c = c +1;
         behavNames{c} = bFields{i};
     end

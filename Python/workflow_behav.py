@@ -3,6 +3,9 @@ import scipy.io as sio
 import os
 import errno
 import numpy as np
+import merge as me
+
+
 
 '''
 Will process all pycontrol txt files given in the directory 'fPath' file.
@@ -14,309 +17,211 @@ to a mouse and an individual matlab structure for each behavioural session
 
 '''
 
-fPath = '/media/jamesrowland/DATA/RawData/ANA'
-outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/ANA'
+fPath = '/media/jamesrowland/DATA/RawData/Behaviour/2018'
+outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/2018'
 
 
-def initialise(fPath):
-    txtFiles = getTxtFiles(fPath)
-
+def initialise(fPath, outPath):
+   
+    
+    #checkMerge = getFiles(fPath, ".txt")
+    #check whether files need to be merged (old version, will keep for now)
+    #me.check_merge(checkMerge)
+    
+    txtFiles = getFiles(fPath, ".txt")
+    
     for txtFile in txtFiles:
-        print(txtFile)
         #this allows you to add 'pass' to a behavioural file's name so it wont be processed
         if 'pass' not in txtFile:      
             try:
                 runWorkflow(txtFile, outPath)
+                
             except (StopIteration, UnicodeDecodeError):
                 print('blank txt files in directory')
                 continue
-    
+            
+
+
 
 def runWorkflow(txtFile, outPath):
-
-    #call Tom's behaviour module        
+    #call Tom's behaviour module       
     my_session = pc.Session(txtFile, False)
 
     # get the meta data from the header of the txt file
-    [ID, date, sessionType, go_pos, maxi] = getMetaData(my_session)
+    mData = getMetaData(my_session)
         
     # create the dictionary 'dictOut' which will be saved as a .mat file
     # this requires running the appropriate functions for the type of training
     # and merging the individual dictionaries using the line z = {**x, **y}
+    
+    if mData['task'] == 'sensory_stimulation':
+        dictOut = getSensoryStim(my_session)
+    if 'flavour' in mData['task']:
+        dictOut = getFlavour(my_session)
+        
+        
+    # compile relevant dictionaries 
+    dictOut = {**mData, **dictOut}
 
-    if sessionType == 'imaging_stimulation':
-        imInfo = getImagingInfo(my_session)
-        dictOut = imInfo
+    saveMatStruct(dictOut, outPath)
+    
+    return dictOut
         
-
-    elif sessionType == 'imaging_discrimination' or sessionType == 'imaging_detection':
-        imInfo = getImagingInfo(my_session)        
-        tS = imInfo['tStart'] #start time of the imaging
-
-        training = getTraining(my_session)
-       
-        # function that subtracts the start time of imaging from other times 
-        norm =  lambda t: [x - tS for x in t]
-        
-        # subtract tstart from times in dictionary
-        training = {key: norm(val) for key, val in training.items()}
-        
-        dictOut = {**training, **imInfo}
-        
-    elif sessionType == 'imaging_flavour':
-        flavourInfo = getFlavourInfo(my_session)
-        dictOut = flavourInfo
-        
-        
-      
-
-    else:
-        # get basic information required in all behaviours in the BSB 
-        basicInfo = getBasicInfo(my_session)
-        
-        if 'habituation' in sessionType:
-            dictOut = basicInfo
-        elif sessionType == 'recognition':
-            training = getTraining(my_session)
-            dictOut = {**basicInfo, **training}
-        elif sessionType == 'discrimination':
-            training = getTraining(my_session)
-            discrim = getDiscrimination(my_session, go_pos)
-            dictOut = {**basicInfo, **training, **discrim}
-            
-       
-    # add the metadata to the dictionary
-    dictOut['ID'] = ID
-    dictOut['date'] = date
-    dictOut['sessionType'] = sessionType
-    dictOut['session_length'] = maxi
-
-    #sometimes the mouse doesnt run at all which will return None value
-    #in the dictionary, scipy cannot make this into a mat, so replace it
-    #with a suitable string
-    for key, value in dictOut.items():
-
-         if value is None:
-             dictOut[key] = 'No Values Found'
-
-    saveMatStruct(dictOut, outPath, ID, sessionType, date)
-        
-def getTxtFiles(fPath):
+          
+def getFiles(fPath, fExt):
+    # finds all the files in fPath with subfolders
+    # with the extension fExt
    
-    txtFiles = []
+    fList = []
     # find all the text files in fPath
     for root, dirs, files in os.walk(fPath):
         for file in files:
-            if file.endswith(".txt"):       
-               txtFiles.append(os.path.join(root, file))
-               
-    return txtFiles
+            if file.endswith(fExt):       
+               fList.append(os.path.join(root, file))
         
+    return fList
+            
+    
 
 def getMetaData(my_session):
-    #get the ID of the mouse 
-    ID = my_session.subject_ID.split('_')[0]
-                 
+    
+    mData = {}
+    #get the ID of the mouse
+    ID = my_session.subject_ID
+    mData['ID'] = ID.split('_')[0]
+    
     # get the date that the session was carried out and use in file name
-    date = my_session.datetime_string.split()[0]
+    mData['date'] = my_session.datetime_string.split()[0]
     
-    go_pos = 'None'
+    mData['task'] = my_session.task_name
+
+    # get area for imaging sessions    
+    aIND = ID.find('area')
     
-    name = my_session.experiment_name
-    try:
-        maxi = max([float(line.split()[0]) for line in my_session.print_lines])
-    except ValueError:
-        maxi = 0
-        
-    if '2p' in name:
-        if 'whiskerstim' in name or 'naive_norun' in name:
-            sessionType = 'imaging_stimulation'
-        
-        elif 'trained_water' in name or 'gonogo' in name:
-            sessionType = 'imaging_discrimination'
-            
-        elif 'detection' in name:
-            sessionType = 'imaging_detection'
-            
-            
-        elif 'flavour' in name:
-            sessionType = 'imaging_flavour'
-            
-            # leaving out the go-pos for now, check later
-            #go_pos = getGoPos(my_session)
-        else:
-            raise ValueError('unknown imaging behaviour %s' %my_session.file_name)
-             
     
-    # find the task the mouse did corresponding to the text file.
-    # call the function relevant to that task 
-    elif 'habituation' in name:
-        if 'firstday'  in name:
-            sessionType = 'habituation_fd'
-        else:
-            sessionType = 'habituation'
-        
-       
-        
-    elif 'training' in my_session.experiment_name:
-        if 'position' in my_session.experiment_name:
-            sessionType = 'discrimination'      
-            go_pos = getGoPos(my_session)
-        else:     
-            sessionType = 'recognition'
-            
-  
+    # get the area string
+    if aIND != -1:
+        area = ID[aIND:]
     else:
-        raise ValueError('Could not assign task to text file %s' % my_session.file_name)
-
-    return ID, date, sessionType, go_pos, maxi
-
-def getGoPos(my_session):
-    
-    # find whether go position is forward or backwards by splitting the go position
-    # string on the value '1' indicating the go position
-    
-    foundGo = False
-    
-    for line in my_session.print_lines:
-       if 'correct position is' in line:
-           foundGo = True
-           split1 = (line.split('1',1)[1])
-           if 'is forward' in split1:
-               go_pos = 1
-           elif 'is backward' in split1:
-               go_pos  = 0
-           else:
-               raise ValueError ('failed to find go position value in file %s' %(my_session.file_name))
-   
-    if foundGo == False:
-        raise ValueError ('failed to find GO position in file %s' % my_session.file_name)
-       
-    return go_pos
-    
-   
-def searchPrintLines(my_session, I):
-    
-    '''
-    function that searches through the lines to see if the first word
-    after the time is the variable 'I'. 
-    returns a list of the times (ms) that the string was printed
-    during behaviour  
-    '''
-    
-    l = [line.split()[0] for line in my_session.print_lines if line.split()[1] == I]
-    
-    return [float(val) for val in l]
+        area = ''
         
-    
-def getBasicInfo(my_session):
-    
-    basicInfo = {}
-    # couldnt use MSPL as water and waterON are recorded 
-    basicInfo['water_delivered'] = [float(line.split()[0]) for line in my_session.print_lines if 'water' in line]
-    basicInfo['running_forward'] =  my_session.times.get('going_forward')
-    basicInfo['licks'] =  my_session.times.get('lick_event')    
-   
-    return basicInfo
-
-
-def getTraining(my_session):
+    mData['area'] = area
         
-    training = {}
+         
+    return mData
 
-    training['correct_trials'] = searchPrintLines(my_session, 'correct')
-    training['missed_trials']  = searchPrintLines(my_session, 'missed')
-    training['falsepositive_trials'] =  searchPrintLines(my_session, 'false_positive')
-    training['correctrejection_trials'] = searchPrintLines(my_session,'rejection')
-    
-    return training
-    
 
-def getDiscrimination(my_session, go_pos):
-    
-    discrim = {}
-        
-    discrim['correctrejection_trials'] = searchPrintLines(my_session,'rejection')
-    discrim['falsepositive_trials'] = searchPrintLines(my_session, 'false_positive')
-    discrim['licks']  = searchPrintLines(my_session, 'lick')
+def getTTL(my_session):
 
-    if go_pos == 1:
-        discrim['go_position']  =  searchPrintLines(my_session, 'forward_position')
-        discrim['nogo_position'] =  searchPrintLines(my_session, 'backward_position')
-    elif go_pos == 0:
-        discrim['go_position'] = searchPrintLines(my_session, 'backward_position')
-        discrim['nogo_position'] = searchPrintLines(my_session, 'forward_position')
+    allIn = my_session.times.get('TTL_in')
+    allOut = my_session.times.get('TTL_out')
   
-    return discrim
-
-
-def getImagingInfo(my_session):
-    
-    '''
-    the behaviour under 2p is stored differently to in the bsb,
-    thus a new function is required    
-    '''
-
-    imInfo = {}
         
+    allTTL = np.zeros((2, len(allIn)))
+        
+    # a list of all the TTLs in case the file needs merging
+    allTTL[0] = allIn
+    allTTL[1] = allOut
+
+        
+    return allTTL
+
+
+def subTTL(dic,tS):
+
+    # function that subtracts the start tS (TTL_in) from times in dictionary 'dic'         
+    for key, val in dic.items():
+        val = np.array(val)
+        # only subtract the TTL from the running time stamp
+        
+        if key == 'running':
+            val[:,0] = val[:,0] - tS
+            dic[key] = val
+        else:
+            dic[key] = val - tS 
+    
+    return dic
+
+
+def motor(my_session):
+    # the motor starts moving
+    
+    mInfo = {}
+    
+    mInfo['motor_start'] = my_session.times.get('motor_forward')
+    #the motor arrives at the whiskers
+    mInfo['motor_atWhisk'] = my_session.times.get('stim_interval')
+    #the motor starts back
+    mInfo['motor_back'] = my_session.times.get('motor_backward')
+
+    #the motor arrives back cut off first origin as this is start of session
+    if my_session.task_name == 'sensory_stimulation':
+        mInfo['motor_atOrigin'] = my_session.times.get('trial_start')
+                
+    return mInfo
+
+def getRunning(my_session):
+    #get the file identifer by removing the .txt
+    txt = my_session.file_name
+    stamp = txt.split('.txt')[0]
+    
+    allPCAs = getFiles(my_session.file_path, '.pca')
+   
+    pca = [f for f in allPCAs if stamp in f]
+
     try:
-        tS = my_session.times.get('TTL_in')[0]
-    except:
-        tS = []
-        print('could not find a trigger for the imaging session %s ' %my_session.file_name)
-
-    imInfo['licks'] =  searchPrintLines(my_session, 'lick')
-    imInfo['water_delivered'] = searchPrintLines(my_session, 'waterON')
-    imInfo['running_forward'] =  my_session.times.get('running mouse')
-    imInfo['running_backward'] = my_session.times.get('moonwalking mouse')
-    #couldnt use 'searchPrintLines' for this because of the conflicting for 'going'
-    imInfo['motor_start'] = [float(line.split()[0]) for line in my_session.print_lines if 'going forward' or 'motor at whiskers' in line]
-    imInfo['initial_trials'] = [float(line.split()[0]) for line in my_session.print_lines if 'end of initial trial' in line]
+        running = pc.load_analog_data(pca[0])
+    except IndexError:
+        raise AssertionError('likely missing PCA files to match txt files' )
+   
+    # same format as read in txt file
+    running = running.astype(np.int64)
     
-    # function that subtracts the start time of imaging from other times 
+    return running
 
-    norm = lambda t: [x - tS for x in t]
-
-    # subtract tstart from times in dictionary
     
-    imInfo = {key: norm(val) for key, val in imInfo.items() if type(val) is list or type(val) is np.ndarray}
 
-    # save tStart for future calculations
-    imInfo['tStart'] = tS
-       
-    #get the area, found after the underscore in the ID
-    name = my_session.subject_ID
-    if 'area' in name:
-        imInfo['area'] = my_session.subject_ID.split('_')[1]
-    else:
-        pass
+def getSensoryStim(my_session):
+    # return all the values that need TTL subtraction before the rest
+    ssInfo = {}
+    
+    ssInfo['running'] = getRunning(my_session)
+    motInf = motor(my_session)
+    ssInfo = {**ssInfo, **motInf}
+    # get the times of all TTLs from throughout the session
+    allTTL = getTTL(my_session)
+    #subtract the first TTL time from all the info
+    #have taken this out of rnow as may be easier to do all subtractions
+    # in matlab
+    #ssInfo = subTTL(ssInfo, allTTL[0,0])
+    
+    ssInfo['TTLs'] = allTTL
+    
+    
+    # do not need TTL subtraction and have left these as strings to prevent allignment to imaging in matlab
+    ssInfo['stim_position'] = [line.split()[5] for line in my_session.print_lines if 'whisker stim position is' in line]
+    ssInfo['stim_speed'] = [line.split()[3] for line in my_session.print_lines if 'speed is' in line]
+    return ssInfo
 
-    return imInfo
-
-
-def getFlavourInfo(my_session):
+def getFlavour(my_session):
+    
     flavInfo = {}
-    flavInfo['running_forward'] = my_session.times.get('going_forward')
-    flavInfo['licks'] = my_session.times.get('lick_event')
     
-    flavInfo['flavourA'] = [float(line.split()[0]) for line in my_session.print_lines if len(line.split()) > 2 and line.split()[2] == 'A']
-    flavInfo['flavourB'] = [float(line.split()[0]) for line in my_session.print_lines if len(line.split()) > 2 and line.split()[2] == 'B']
+    #flavInfo['running'] = getRunning(my_session)
+    flavInfo['flavourA'] = [float(line.split()[0]) for line in my_session.print_lines if 'flavour' in line and line.split()[-1] == 'A']
+    flavInfo['flavourB'] = [float(line.split()[0]) for line in my_session.print_lines if 'flavour' in line and line.split()[-1] == 'B']
     
-    name = my_session.subject_ID
-    if 'area' in name:
-        flavInfo['area'] = my_session.subject_ID.split('_')[1]
-    else:
-        pass
-
-   
+    TTL, endTTL = getTTL(my_session)
+    flavInfo = subTTL(flavInfo, TTL)
+    
     return flavInfo
+
     
 
+def saveMatStruct(dictOut, outPath):
 
-def saveMatStruct(dictOut, outPath, ID, sessionType, date):
-    
    # the path to the mouse specific folder
-    savePath = outPath + '/' + ID + '/'
+    savePath = outPath + '/' + dictOut['ID'] + '/'
      
     # create the mouse specific folder if it does not already exist
     if not os.path.exists(os.path.dirname(savePath)):
@@ -325,29 +230,18 @@ def saveMatStruct(dictOut, outPath, ID, sessionType, date):
         except OSError as exc: # Guard against race condition
             if exc.errno != errno.EEXIST:
                 raise
-    
-    # need information about the area to prevent overwriting in cases where more than 
-    # one behaviour has been recorded on the same day during imaging
-    
-    if 'area' in dictOut:
-        area = dictOut['area']
-    else:
-        area = ''
+
 
     #save the dictionary as a matlab structure in the mouse folder
-    sio.savemat(savePath + sessionType + '_' + date + area + '.mat',{'behavioural_data':dictOut}) 
+    sio.savemat(savePath + dictOut['task'] + '_' + dictOut['date'] + '_' + dictOut['area'] + '.mat',{'behavioural_data':dictOut}) 
 
 
-
-initialise(fPath)    
-    
-
-
-
-
-
-
-
+# use this to debug
+#t = '/media/jamesrowland/DATA/RawData/Behaviour/2018/GTRS1.5d_area01-2018-01-26-154446.txt'
+#t = '/media/jamesrowland/DATA/RawData/Behaviour/comb_test/testTTLout-2018-02-01-114116.txt'
+#do = runWorkflow(t, outPath)
+  
+initialise(fPath, outPath)
 
 
 
@@ -360,9 +254,19 @@ initialise(fPath)
 
 
 
-    
 
 
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
 
