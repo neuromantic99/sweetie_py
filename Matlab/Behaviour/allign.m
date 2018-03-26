@@ -20,7 +20,8 @@ for i = 1:length(bFields)
     date = bFields{i};
     
     try
-        areas = fieldnames(imaging.(date));
+        %areas = fieldnames(imaging.(date));
+        areas = fieldnames(behav.(date));
     catch
         warning('Cannot find both the imaging and the behaviour from date  %s', date)
         continue
@@ -39,10 +40,21 @@ for i = 1:length(bFields)
             error('an error here most likely means the subject ID or the area of a file is incorrect')
         end
         
+        % this performs TTL subtraction and removes data from outside
+        % imaging.
+        session = bMerger(session);
+            
+        
         sFields = fieldnames(session);
         
+        
         % get the imaging session relevant to the behaviour
-        iFields = fieldnames(imaging.(date).(areas{ii}));
+        try
+            
+            iFields = fieldnames(imaging.(date).(areas{ii}));
+        catch
+            error('likely cannot find imaging to match behaviour')
+        end
         imSession = imaging.(date).(areas{ii}).(iFields{1});
         
         % get the frame rate of the imaging on each date in
@@ -60,18 +72,19 @@ for i = 1:length(bFields)
             % iterate through each field in the session
             f = session.(sFields{iii});
             
-            if ismember(sFields{iii}, {'motor_start','licks','water_delivered', 'running_forward', 'correct_trials','missed_trials','falsepositive_trials','correctrejection_trials','initial_trials', 'flavourA','flavourB'})
-               
+            % im not entirely sure whether this is robust and whether
+            % future variables will be saved as integer or double, so
+            % please check the start of this loop.
+            
+            if isinteger(f) && ~strcmp(sFields{iii}, 'velocity')
                 
+                % cannot do float divisions with int64
+                f = double(f);
+
                 fSecs = f/1000; %convert from ms to s
                 
-                %remove behavioural data that occured
-                %after imaging stopped
-                highIND = find(fSecs>lenIm);
-                fSecs(highIND) = [];
-                
                 %bin the behavioural data by frame
-                edges  = linspace(0,lenIm,lenIm*fRate);
+                edges  = linspace(0,lenIm,lenIm*fRate + 1);
                 fBin = discretize(fSecs, edges);
                 
                 % change the session field to reflect fBin
@@ -81,18 +94,58 @@ for i = 1:length(bFields)
             end
             
         end
+
+       
+        % bin the velocities by frame and take a mean. Giving the 
+        % avergae speed (steps / second) of the mouse across the frame
         
-        % remove tStart because it is not necessary
-        if isfield(session, 'tStart')
-            session = rmfield(session,'tStart');
+        vel = session.velocity;
+        vel_time = session.velocityTime;
+        
+        velBinned = cell(max(vel_time),1);
+        
+        for samp = 1:length(vel)
+            % the frame index it belongs to
+            fIND = vel_time(samp);
+            try
+                velBinned{fIND} = [velBinned{fIND} vel(samp)];
+            catch
+                keyboard
+            end
+        end
+            
+        for bin = 1:length(velBinned)
+            
+            velBinned{bin} = mean(velBinned{bin});
         end
         
+        velBinned = cell2mat(velBinned);
+        
+        session.velocity = velBinned;
+        session = rmfield(session,'velocityTime');
+        
+        % python workflow doens't like these character arrays
+        sp = session.stim_position;
+        for iiiii = 1:length(sp)
+            sps(iiiii) = str2double(sp(iiiii,:));
+        end
+        
+        ss = session.stim_speed;
+        for iiiii = 1:length(ss)
+            sss(iiiii) = str2double(ss(iiiii,:));
+        end
+        
+     
         %append to the imaging structure
+        session.stim_speed = sss;
+        session.stim_position = sps;
+        
         imaging.(date).(areas{ii}).session_behaviour = session;
+
         
     end
     
-
+    
     
 end
 
