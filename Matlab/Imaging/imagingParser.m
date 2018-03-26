@@ -103,6 +103,9 @@ for i = 1:length(allMats)
 
     % get the frame rate
     fRate = dat.ops.imageRate;
+    
+    %fRate =  30.053627489117797
+    
     %divide the frame rate by the number of planes to get
     %the frame rate at individual frames
     nPlanes = dat.ops.nplanes;

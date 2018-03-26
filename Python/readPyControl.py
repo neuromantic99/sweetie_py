@@ -40,7 +40,8 @@ class Session():
     '''
 
     def __init__(self, file_path, int_subject_IDs=True):
-
+	
+        self.file_path = os.path.split(file_path)[0]
         # Load lines from file.
         
         # Had to change import encoding to utf-8 to satisfy my console 
@@ -48,9 +49,7 @@ class Session():
                   
             all_lines = [line.strip() for line in f.readlines() if line.strip()]
 
-            
-            
-            
+
         # utf-8 encoding generates weird string at start of document which needs to be removed
       
         all_lines = [line.replace(u'\ufeff', '') for line in all_lines]
@@ -90,6 +89,11 @@ class Session():
                       for event_name in ID2name.values()}
 
         self.print_lines = [line[2:] for line in all_lines if line[0]=='P']
+        
+        # JR addition
+        self.merge_lines = [line for line in all_lines if line[0] == 'P' or line[0] == 'D']
+        
+        self.headers = [line for line in all_lines if line[0] == 'I' or line[0] == 'S' or line[0] == 'E']
 
 
 #----------------------------------------------------------------------------------
@@ -205,24 +209,15 @@ def _toDate(d): # Convert input to datetime.date object.
         raise ValueError
         
         
-#==============================================================================
-# fPath = '/Users/James/Google Drive/BehaviouralData/VIP394a/area01/'
-# fName = 'VIP394a-2017-10-06-112449.txt'
-# 
-# x = Session(fPath + fName)
-# with open(fPath + 'sessions.pkl', 'wb') as f:
-#     pickle.dump(x, f)
-# 
-# Experiment(fPath)
-# 
-# 
-#==============================================================================
+#----------------------------------------------------------------------------------
+# Load analog data
+#----------------------------------------------------------------------------------
 
-
-
-
-
-
+def load_analog_data(file_path):
+    '''Load a pyControl analog data file and return the contents as a numpy array
+    whose first column is timestamps (ms) and second data values.'''
+    with open(file_path, 'rb') as f:
+        return np.fromfile(f, dtype='<i').reshape(-1,2)
 
 
 
