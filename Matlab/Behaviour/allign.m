@@ -124,21 +124,25 @@ for i = 1:length(bFields)
         session.velocity = velBinned;
         session = rmfield(session,'velocityTime');
         
-        % python workflow doens't like these character arrays
-        sp = session.stim_position;
-        for iiiii = 1:length(sp)
-            sps(iiiii) = str2double(sp(iiiii,:));
-        end
         
-        ss = session.stim_speed;
-        for iiiii = 1:length(ss)
-            sss(iiiii) = str2double(ss(iiiii,:));
-        end
+        if isfield(session, 'stim_position')
         
-     
-        %append to the imaging structure
-        session.stim_speed = sss;
-        session.stim_position = sps;
+            % python workflow doens't like these character arrays
+            sp = session.stim_position;
+            for iiiii = 1:length(sp)
+                sps(iiiii) = str2double(sp(iiiii,:));
+            end
+
+            ss = session.stim_speed;
+            for iiiii = 1:length(ss)
+                sss(iiiii) = str2double(ss(iiiii,:));
+            end
+
+
+            %append to the imaging structure
+            session.stim_speed = sss;
+            session.stim_position = sps;
+        end
         
         imaging.(date).(areas{ii}).session_behaviour = session;
 
