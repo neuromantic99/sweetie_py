@@ -71,8 +71,11 @@ for i = 1:length(fs)
     end
 end
 
-outSession.stim_position = inSession.stim_position(tIND,:);
-outSession.stim_speed = inSession.stim_speed(tIND,:);
+if isfield(inSession, 'stim_position')
+    outSession.stim_position = inSession.stim_position(tIND,:);
+    outSession.stim_speed = inSession.stim_speed(tIND,:);
+end
+    
 outSession.velocity = inSession.velocity(velIND);
 
 
