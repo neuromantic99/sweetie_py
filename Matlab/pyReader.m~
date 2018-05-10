@@ -1,0 +1,21 @@
+clear
+fPath = '/media/jamesrowland/DATA/RawData/Behaviour/2018/GTRS1.6b_area01-2018-03-14-193652.txt';
+
+fid = fopen(fPath);
+tline = fgetl(fid);
+
+lines = {};
+
+while ischar(tline)
+    lines{end+1} = tline;
+    tline = fgetl(fid); 
+end
+    
+session = getMetaData(lines);
+session.times = getTimes(lines);
+session.print_lines = getPrintLines(lines);
+
+
+while 1
+    A = fopen('/media/jamesrowland/DATA/RawData/Behaviour/2018/GTRS1.5d_area02-2018-01-26-160930_encoder.pca')
+end
