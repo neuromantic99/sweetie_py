@@ -14,8 +14,10 @@ to a mouse and an individual matlab structure for each behavioural session
 
 '''
 
-fPath = '/media/jamesrowland/DATA/RawData/Behaviour/Ana/'
-outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/Ana/'
+
+fPath = '/media/jamesrowland/DATA/RawData/Behaviour/2018'
+outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/2018'
+
 
 
 def initialise(fPath, outPath):

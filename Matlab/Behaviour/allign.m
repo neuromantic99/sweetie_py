@@ -110,7 +110,11 @@ for i = 1:length(bFields)
             try
                 velBinned{fIND} = [velBinned{fIND} vel(samp)];
             catch
-                keyboard
+                %keyboard
+                % have this in here as a inelegant way of throwing out NaN
+                % when there is too many frames after veloicty binning
+                % this should be changed
+                continue
             end
         end
             
