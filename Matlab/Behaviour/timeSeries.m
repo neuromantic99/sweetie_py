@@ -10,7 +10,7 @@ bFields = fieldnames(behaviour);
 behavNames = {};
 c = 0;
 for i = 1:length(bFields)  
-    if contains(bFields{i},'sensory') || contains(bFields{i}, 'imaging_')     
+    if contains(bFields{i},'sensory') || contains(bFields{i}, 'imaging_')  || contains(bFields{i}, 'havpc')     
         c = c +1;
         behavNames{c} = bFields{i};
     end
@@ -22,6 +22,11 @@ for i = 1:length(behavNames)
     imaging = allign(behaviour, imaging, behavNames{i});
 end
 
+% use this to break the function is tbt is not required
+% or behaviour does not have motor information
+if contains(bFields{i}, 'havpc') 
+    return
+end
 
 dates = fieldnames(imaging);
 

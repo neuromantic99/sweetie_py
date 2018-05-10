@@ -3,9 +3,6 @@ import scipy.io as sio
 import os
 import errno
 import numpy as np
-import merge as me
-
-
 
 '''
 Will process all pycontrol txt files given in the directory 'fPath' file.
@@ -17,19 +14,16 @@ to a mouse and an individual matlab structure for each behavioural session
 
 '''
 
+
 fPath = '/media/jamesrowland/DATA/RawData/Behaviour/2018'
 outPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/2018'
 
 
+
 def initialise(fPath, outPath):
-   
-    
-    #checkMerge = getFiles(fPath, ".txt")
-    #check whether files need to be merged (old version, will keep for now)
-    #me.check_merge(checkMerge)
-    
+ 
     txtFiles = getFiles(fPath, ".txt")
-    
+    #me.check_merge(txtFiles)
     for txtFile in txtFiles:
         #this allows you to add 'pass' to a behavioural file's name so it wont be processed
         if 'pass' not in txtFile:      
@@ -40,8 +34,6 @@ def initialise(fPath, outPath):
                 print('blank txt files in directory')
                 continue
             
-
-
 
 def runWorkflow(txtFile, outPath):
     #call Tom's behaviour module       
@@ -59,7 +51,9 @@ def runWorkflow(txtFile, outPath):
     if 'flavour' in mData['task']:
         dictOut = getFlavour(my_session)
         
-        
+    if 'havpc' in mData['task']:
+        dictOut = getHavpc(my_session)
+    
     # compile relevant dictionaries 
     dictOut = {**mData, **dictOut}
 
@@ -106,8 +100,7 @@ def getMetaData(my_session):
         area = ''
         
     mData['area'] = area
-        
-         
+             
     return mData
 
 
@@ -126,21 +119,6 @@ def getTTL(my_session):
         
     return allTTL
 
-
-def subTTL(dic,tS):
-
-    # function that subtracts the start tS (TTL_in) from times in dictionary 'dic'         
-    for key, val in dic.items():
-        val = np.array(val)
-        # only subtract the TTL from the running time stamp
-        
-        if key == 'running':
-            val[:,0] = val[:,0] - tS
-            dic[key] = val
-        else:
-            dic[key] = val - tS 
-    
-    return dic
 
 
 def motor(my_session):
@@ -188,19 +166,14 @@ def getSensoryStim(my_session):
     ssInfo['running'] = getRunning(my_session)
     motInf = motor(my_session)
     ssInfo = {**ssInfo, **motInf}
+    
     # get the times of all TTLs from throughout the session
-    allTTL = getTTL(my_session)
-    #subtract the first TTL time from all the info
-    #have taken this out of rnow as may be easier to do all subtractions
-    # in matlab
-    #ssInfo = subTTL(ssInfo, allTTL[0,0])
+    ssInfo['TTLs'] = getTTL(my_session)
     
-    ssInfo['TTLs'] = allTTL
-    
-    
-    # do not need TTL subtraction and have left these as strings to prevent allignment to imaging in matlab
+    # have left these as strings to prevent allignment to imaging in matlab
     ssInfo['stim_position'] = [line.split()[5] for line in my_session.print_lines if 'whisker stim position is' in line]
     ssInfo['stim_speed'] = [line.split()[3] for line in my_session.print_lines if 'speed is' in line]
+    
     return ssInfo
 
 def getFlavour(my_session):
@@ -211,11 +184,24 @@ def getFlavour(my_session):
     flavInfo['flavourA'] = [float(line.split()[0]) for line in my_session.print_lines if 'flavour' in line and line.split()[-1] == 'A']
     flavInfo['flavourB'] = [float(line.split()[0]) for line in my_session.print_lines if 'flavour' in line and line.split()[-1] == 'B']
     
-    TTL, endTTL = getTTL(my_session)
-    flavInfo = subTTL(flavInfo, TTL)
+    flavInfo['TTLs'] = getTTL(my_session)
+
     
     return flavInfo
 
+def getHavpc(my_session):
+    
+    havpc = {}
+    
+    havpc['ITI_finish'] = my_session.times.get('iti_finish')
+    havpc['ITI_epoch'] = my_session.times.get('iti_epoch') 
+    havpc['lick_wait'] = my_session.times.get('lick_wait')
+    havpc['lick_event'] = my_session.times.get('lick_event')
+    havpc['running'] = getRunning(my_session)
+    havpc['TTLs'] = getTTL(my_session)
+    
+    return havpc
+    
     
 
 def saveMatStruct(dictOut, outPath):
@@ -234,6 +220,7 @@ def saveMatStruct(dictOut, outPath):
 
     #save the dictionary as a matlab structure in the mouse folder
     sio.savemat(savePath + dictOut['task'] + '_' + dictOut['date'] + '_' + dictOut['area'] + '.mat',{'behavioural_data':dictOut}) 
+    
 
 
 # use this to debug

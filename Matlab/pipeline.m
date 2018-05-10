@@ -23,8 +23,11 @@ function [imaging, behaviour] = pipeline(mouse)
 
 % all of these paths must end with a '/' this can be responsible for
 % a variety of errors
+
+
 imagingPath = '/home/jamesrowland/Documents/ProcessedData/imaging/2018/';
 behaviourPath = '/home/jamesrowland/Documents/ProcessedData/behaviour/2018/';
+
 savePath = '/home/jamesrowland/Documents/ProcessedData/';
 
 %make apprporiate subfolders if they dont exist
@@ -39,10 +42,10 @@ end
 fNameImaging = [savePath '/ca-data-large/2018/' mouse '.mat'];
 fNameBehaviour = [savePath '/fullStructuresBehaviour/2018/' mouse '.mat'];
 
+
 % run master imaging and behaviour functions
 imaging = imagingParser(imagingPath, mouse);
 behaviour = behaviourParser(behaviourPath, mouse);
-
 
 
 % use behaviourPlotter to plot raster plots of behaviour
@@ -59,9 +62,6 @@ if iscell(imaging) == 0
     imaging = timeSeries(imaging, behaviour);   
     save(fNameImaging, 'imaging', '-v7.3');
 end
-
-
-
 
 
 end

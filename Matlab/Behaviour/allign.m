@@ -110,7 +110,11 @@ for i = 1:length(bFields)
             try
                 velBinned{fIND} = [velBinned{fIND} vel(samp)];
             catch
-                keyboard
+                %keyboard
+                % have this in here as a inelegant way of throwing out NaN
+                % when there is too many frames after veloicty binning
+                % this should be changed
+                continue
             end
         end
             
@@ -124,21 +128,25 @@ for i = 1:length(bFields)
         session.velocity = velBinned;
         session = rmfield(session,'velocityTime');
         
-        % python workflow doens't like these character arrays
-        sp = session.stim_position;
-        for iiiii = 1:length(sp)
-            sps(iiiii) = str2double(sp(iiiii,:));
-        end
         
-        ss = session.stim_speed;
-        for iiiii = 1:length(ss)
-            sss(iiiii) = str2double(ss(iiiii,:));
-        end
+        if isfield(session, 'stim_position')
         
-     
-        %append to the imaging structure
-        session.stim_speed = sss;
-        session.stim_position = sps;
+            % python workflow doens't like these character arrays
+            sp = session.stim_position;
+            for iiiii = 1:length(sp)
+                sps(iiiii) = str2double(sp(iiiii,:));
+            end
+
+            ss = session.stim_speed;
+            for iiiii = 1:length(ss)
+                sss(iiiii) = str2double(ss(iiiii,:));
+            end
+
+
+            %append to the imaging structure
+            session.stim_speed = sss;
+            session.stim_position = sps;
+        end
         
         imaging.(date).(areas{ii}).session_behaviour = session;
 
