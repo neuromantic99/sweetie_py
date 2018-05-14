@@ -1,5 +1,4 @@
-clear
-fPath = '/media/jamesrowland/DATA/RawData/Behaviour/2018/GTRS1.6b_area01-2018-03-14-193652.txt';
+function session = pyReader(fPath) 
 
 fid = fopen(fPath);
 tline = fgetl(fid);
@@ -10,12 +9,12 @@ while ischar(tline)
     lines{end+1} = tline;
     tline = fgetl(fid); 
 end
+
+% check it is actually a pycontrol txt file
+if 
     
 session = getMetaData(lines);
 session.times = getTimes(lines);
 session.print_lines = getPrintLines(lines);
 
 
-while 1
-    A = fopen('/media/jamesrowland/DATA/RawData/Behaviour/2018/GTRS1.5d_area02-2018-01-26-160930_encoder.pca')
-end

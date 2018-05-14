@@ -18,9 +18,8 @@ for i = 1:length(fs)
     %iterate through each beahvioural variables
     f = inSession.(fs{i});
     
-    %check this, there may be doubles that you want to pass through this
-    %loop
-    if ~strcmp(fs{i}, 'TTLs') && ~strcmp(fs{i}, 'velocity')  && isa(f, 'integer')
+
+    if ~strcmp(fs{i}, 'TTLs') && ~strcmp(fs{i}, 'velocity')  && isa(f, 'double')
         
         %list to append the values between TTLs
         imB = [];
@@ -72,8 +71,8 @@ for i = 1:length(fs)
 end
 
 if isfield(inSession, 'stim_position')
-    outSession.stim_position = inSession.stim_position(tIND,:);
-    outSession.stim_speed = inSession.stim_speed(tIND,:);
+    outSession.stim_position = inSession.stim_position(tIND);
+    outSession.stim_speed = inSession.stim_speed(tIND);
 end
     
 outSession.velocity = inSession.velocity(velIND);

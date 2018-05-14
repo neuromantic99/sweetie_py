@@ -54,7 +54,7 @@ imStruct = imagingParser(imagingPath, mouse);
 if iscell(imStruct) == 0
     imaging = timeSeries(imStruct, behavStruct);   
     % save the combined imaging and behaviour structure
-    save([savePathIm mouse '.mat'], 'imaging', '-v7.3');
+    save([savePathIm '/' mouse '.mat'], 'imaging', '-v7.3');
 end
 
 

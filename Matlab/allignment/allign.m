@@ -5,10 +5,7 @@ function imaging = allign(behaviour, imaging, behavType)
 % frame rate etc
 %
 % Also moves the imaging behaviour into the imaging structure
-%
-% pretty dirty function, may cause bugs at later date
-% need to change this for the speed as it is
-% already binned
+
 
 behav = behaviour.(behavType);
 
@@ -76,10 +73,7 @@ for i = 1:length(bFields)
             % future variables will be saved as integer or double, so
             % please check the start of this loop.
             
-            if isinteger(f) && ~strcmp(sFields{iii}, 'velocity')
-                
-                % cannot do float divisions with int64
-                f = double(f);
+            if isa(f, 'double') && ~strcmp(sFields{iii}, 'velocity') && ~strcmp(sFields{iii}, 'TTLs')
 
                 fSecs = f/1000; %convert from ms to s
                 
@@ -110,7 +104,7 @@ for i = 1:length(bFields)
             try
                 velBinned{fIND} = [velBinned{fIND} vel(samp)];
             catch
-                %keyboard
+                
                 % have this in here as a inelegant way of throwing out NaN
                 % when there is too many frames after veloicty binning
                 % this should be changed
@@ -131,15 +125,21 @@ for i = 1:length(bFields)
         
         if isfield(session, 'stim_position')
         
-            % python workflow doens't like these character arrays
+            % python workflow doens't like character arrays
+            % i need to come up with a better way of doing this 
+            % at the moment matlab saves these as strings, it aligns
+            % then converts to double.
+            % sorry about the 'iiiiii' there's too many loops in this
+            % function
+            
             sp = session.stim_position;
             for iiiii = 1:length(sp)
-                sps(iiiii) = str2double(sp(iiiii,:));
+                sps(iiiii) = str2double(sp{iiiii});
             end
 
             ss = session.stim_speed;
             for iiiii = 1:length(ss)
-                sss(iiiii) = str2double(ss(iiiii,:));
+                sss(iiiii) = str2double(ss{iiiii});
             end
 
 
