@@ -1,11 +1,11 @@
-function imaging = imagingParser(fPath, mouse)
+function imStruct = imagingParser(fPath, mouse)
 
 fPath= [fPath mouse '/'];
 
 %get all the mat files that result from gui editing in suite 2p
 allMats = dir([fPath  '**/*proc.mat']);
 % create the structure to hold processed imaging data
-imaging = {};
+imStruct = {};
 
 for i = 1:length(allMats)
     
@@ -117,15 +117,15 @@ for i = 1:length(allMats)
     % have taken out the raw fluoresence to lighten the size of the
     % structure
     
-    imaging.(dateStr).(regionStr).(planeStr).raw_fluoresence = raw_fluo;
-    imaging.(dateStr).(regionStr).(planeStr).raw_neuropil = raw_np;
-    imaging.(dateStr).(regionStr).(planeStr).spike_timings = all_spike_times;
-    imaging.(dateStr).(regionStr).(planeStr).spike_amps = all_spike_amps;
+    imStruct.(dateStr).(regionStr).(planeStr).raw_fluoresence = raw_fluo;
+    imStruct.(dateStr).(regionStr).(planeStr).raw_neuropil = raw_np;
+    imStruct.(dateStr).(regionStr).(planeStr).spike_timings = all_spike_times;
+    imStruct.(dateStr).(regionStr).(planeStr).spike_amps = all_spike_amps;
     
-    imaging.(dateStr).(regionStr).(planeStr).fluoresence_corrected = dFoF;
-    imaging.(dateStr).(regionStr).(planeStr).position = neuron_position;
-    imaging.(dateStr).(regionStr).(planeStr).is_red = is_red_neuron;
-    imaging.(dateStr).(regionStr).(planeStr).fRate = fRate;
+    imStruct.(dateStr).(regionStr).(planeStr).fluoresence_corrected = dFoF;
+    imStruct.(dateStr).(regionStr).(planeStr).position = neuron_position;
+    imStruct.(dateStr).(regionStr).(planeStr).is_red = is_red_neuron;
+    imStruct.(dateStr).(regionStr).(planeStr).fRate = fRate;
 
 end
 
