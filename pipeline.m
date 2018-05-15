@@ -3,23 +3,22 @@ function [imaging, behaviour] = pipeline(mouse)
 % Pipeline to generate the structure containing all the information
 % (behaviour and imaging about a mouse.
 
-% Requires the functions: behaviourParser, imagingParser, dF_percentile,
-% running_speed, timeSeries and allign
-%
+% Requires all matlab functions in the I-just-kohld-to-say-i-love-you repo
+
 % set 'imagingPath' as the path to where all the suite2p processed imaging
 % information is stored. Each mouse should have its own folder called after
 % the name of the mouse. Otherwise the folder structure in this directory
 % is irrelevant as all information about the mouse is contained in the dat
 % file
 
-% set 'behaviourPath' as the path corre2sponding to the variable 'outPath'
-% in the python function 'workflow_behav.py'. Again mice must be in a
-% folder with their name but folder structure does not matter otherwise.
+% set 'behaviourPath' as the path to the raw txt and PCA files outputted from
+% pyControl folder structure does not matter
 
-% set 'savePath' as the path where the final structures will be saved.
-% data is saved as a mat file with the behaviour and imaging data seperate.
-% the pipeline function can also be used within matlab to return the
-% structure 'data' containing both imaging and behaviour
+% set 'savePathBehav' as an existing folder where the behavioral structure
+% should be saved
+
+% set 'savePathIm' as an existing folder where the combined and aligned
+% imagng and behaviour structure will be saved
 
 % all of these paths must end with a '/' this can be responsible for
 % a variety of errors
@@ -54,7 +53,7 @@ imStruct = imagingParser(imagingPath, mouse);
 if iscell(imStruct) == 0
     imaging = timeSeries(imStruct, behavStruct);   
     % save the combined imaging and behaviour structure
-    save([savePathIm '/' mouse '.mat'], 'imaging', '-v7.3');
+    save([savePathIm mouse '.mat'], 'imaging', '-v7.3');
 end
 
 
