@@ -46,6 +46,12 @@ for i = 1:length(txts)
     dateInf = split(inSession.date, ' ');
     date = datestr(dateInf{1}, 'yyyy-mm-dd');
     
+        
+    if strcmp(inSession.task, 'sens_stim_baseline')
+        inSession.task = 'sensory_stimulation';
+    end
+    
+    
     outSession.ID = ID;
     outSession.date = date;
     outSession.area = area;
