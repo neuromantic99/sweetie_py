@@ -1,18 +1,32 @@
 
 # Kohl lab pipeline for processing suite2p imaging data and pyControl behaviour  
 
-To use the pipeline, first run workflow_behav setting the file paths as detailed in the comments.
+## What is this repository for?
 
-Next run the matlab function 'pipeline' giving a mouse name as an argument and again setting the file paths as detailed in the comments.
-The script 'processAll' can also be used to run multiple mice through the pipeline.
+* To process multiple raw PyControl txt and binary files into a organised matlab structure
+* To align behaviour during 2P imaging with matlab structures outputted by Suite-2p
+* present imaging data and aligned behaviour in a single organised matlab structure
 
-The output of pipeline is two structures: imaging and behaviour.
+## Requirements
 
-The behaviour structure contains information about all the behaviour not aquired during imaging.
+* Matlab 2017b or later
 
-The imaging structure contains information about both imaging (planeN) and the behaviour (session_behaviour) that was recorded during that imaging session. 
+## Usage
 
-The functions from readPyControl.py in this repository are based on the data_import.py module availble at: https://bitbucket.org/takam/pycontrol/src/default/tools/data_import.py?fileviewer=file-view-default
+* Download all matlab functions and ensure they are in matlab's path
+* Set the paths in the pipeline function as detailed in the comments. Essentially pointing to where your 
+suite-2p structures and raw pycontrol files are held
+* Suite 2p files should be stored using the default output file structure of suite2p - mouse>date>area>plane. See https://github.com/cortex-lab/Suite2P
+* The pipeline takes an arugment 'mouse' this should be the ID of the mouse whose data structure you wish to generate. (See next section).
+* The pipeline will save two structures, one containing just behaviour and one containing imaging aligned with behaviour. The save location is dictated by the savePath variables in the pipeline.
+* Each pyControl task will have different variables of interest. These currently need to be updated in teh getTasks.m function. 
+
+### Mouse IDs
+* The mouse arugment to the pipeline function should be identical to the mouse_name varibale in suite2p
+* In pyControl for pure behaviour, the Subject ID should be identical to the suite2p and pipeline mouse name variables
+* When using pyControl for imaging the Subject ID should be in the format mousename_areaxx. Where xx is the area number in the format 01, 02, 03 ...
+* If the task has a TTL variable corresponding to the start and end of imaging, imaging can be started and stopped multiple times for the same area without stopping pyControl or 
+changing the Subject ID. If the objective is moved, the area number should be updated as above.
 
 
 ## Data format in imaging structure:
@@ -22,28 +36,28 @@ The functions from readPyControl.py in this repository are based on the data_imp
 The timestamps of all behavioural data is normalised to the start of the imaging and has the unit of FRAMES.
 So the timestamp refers to the imaging frame at which the behavioural event occured.
 
-The trial events (e.g. correct_trials) are printed about 4-5 seconds after trial onset. Hence the time of these events is probably not very informative. Use trialType instead.
+#### Operant tasks
 
-session_behaviour contains the following fields:
-
-* correct_trials: The frames that correct_trial was printed
-* missed_trials: The frames that missed_trial was printed 
-* falsepositive_trials: The frames that the falsepositive_trial was printed 
-* correctrejection_trials: The frames that correctrejection_trial was printed 
-* licks: The frames that a lick event was registered 
-* water_delivered: The frames that a water reward was delivered
-* running_forward: The frames that a binary running forward event was detected (rotary encoder currently samples at 1Hz)
-* running_backward: The frames that a binary running backward event was detected
-* motor_start: The frames that the motor started moving forwards. This is used as the signal to create trial by trial information
-* initial_trials: The frames that initial_trial was printed. 
-* area: The area number that the behaviour and imaging was recorded at
 * ID: The name of the mouse on MCMS
 * date: The date of the imaging
-* sessionType: The type of behaviour occuring during imaging
-* session_length: length of the session (ms)
-* runEvents: Running events binned (current bin size = 7 seconds) bin size can be changed using the variable 'time_bins' in the running_speed.m function
-* mid_time_bins: The time (seconds) at the centre of the bin
+* area: The area number that the behaviour and imaging was recorded at
+* task: the pyControl task
+* licks: The frames that a lick event was registered 
+* water_delivered: The frames that a water reward was delivered
+* motor_start: The frame that the motor started moving forwards. This is used as the signal to create trial by trial information
+* motor_atWhisk: The frame that the motor arrived at the whiskers
+* motor_back: The frame that the motor started back from the whiskers
+* motor_atOrigin: The frame that the motor arrived back at the origin
+* TTLs: The frames that 2P triggering TTLs arrived at pyControl. h=Has dimensionality [2 x num_recordings]. Row 1 is TTLin, row 2 in TTLout. 
+* velocity: The mean speed of the rotary encoder within each frame 
 * trialType: This list is where information about the trial outcome (e.g. correct_trial) should be read from. It is an ordered list of trial outcomes, ordered in the same way as motor_start and trialByTrialFlu. So trialType(1) shows the outcome of the trial initiated by motor_start(1) and recorded as trialByTrialFlu(1,:,:). The first 1-3 trials should be called 'initial'. This is where the animal does not have to induce the trial by running and is automatically rewarded regardless of behaviour.
+
+#### Sensory Stimulation
+
+Same as above, but without trialType and licks and the addition of:
+* stim_position: the position the pole was moved to
+* stim_speed: the speed of the pole
+
 
 ### Imaging data (planeN)
 
@@ -53,7 +67,7 @@ The result of the 2p imaging generated by suite2p, containing the following fiel
 * raw_neuropil: same as above, but the fluoresence signal from the neuropil surrounding the ROI.
 * spike_timings: Contains only ROI selected as cells in the GUI (refered to herein as units). A cell of dimensionality (nUnits x 1). Each index of the cell contains a matrix of dimensionality (nSpikes x 1). Each item in these matrices is the frame that a spike occured in that given unit.
 * spike_amps: same as above, but the amplitude of the corresponding spike
-* fluoresence_corrected: a matrix of dimensionality (nUnits x nFrames). Contains the corrected fluoresence signal (neuropil subtracted and DFoF) from each unit at each frame.
+* fluoresence_corrected: a matrix of dimensionality (nUnits x nFrames). Contains the corrected fluoresence signal (neuropil subtracted from each unit at each frame.
 * position: a matrix of dimensionality (nUnits x 2). The xy coordinates of each unit.
 * is_red: whether or not each unit also gives a signal in the red channel (if present)
 * fRate: the frame rate at planeN
