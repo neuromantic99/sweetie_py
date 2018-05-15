@@ -55,6 +55,7 @@ So the timestamp refers to the imaging frame at which the behavioural event occu
 #### Sensory Stimulation
 
 Same as above, but without trialType and licks and the addition of:
+
 * stim_position: the position the pole was moved to
 * stim_speed: the speed of the pole
 
