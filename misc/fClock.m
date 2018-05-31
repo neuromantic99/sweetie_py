@@ -1,4 +1,4 @@
-fPath = '/media/jamesrowland/DATA/RawData/Behaviour/2018/fClock_AREA02.txt';
+fPath = '/media/jamesrowland/DATA/RawData/Behaviour/2018/CTBD1.1j_area01_frameclock.txt';
 fc = load(fPath);
 
 for i = 1:length(fc)-1

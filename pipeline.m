@@ -1,4 +1,4 @@
-function [imaging, behaviour] = pipeline(mouse)
+function [imaging, behavStruct] = pipeline(mouse)
 
 % Pipeline to generate the structure containing all the information
 % (behaviour and imaging about a mouse.
@@ -10,6 +10,8 @@ function [imaging, behaviour] = pipeline(mouse)
 % the name of the mouse. Otherwise the folder structure in this directory
 % is irrelevant as all information about the mouse is contained in the dat
 % file
+
+%set 'imagingPath' as the path to the proc files coming from suite2p
 
 % set 'behaviourPath' as the path to the raw txt and PCA files outputted from
 % pyControl folder structure does not matter
@@ -24,11 +26,11 @@ function [imaging, behaviour] = pipeline(mouse)
 % a variety of errors
 
 
-imagingPath = '/home/jamesrowland/Documents/ProcessedData/imaging/2018/';
+imagingPath = '/media/jamesrowland/DATA/ProcessedData/procs/';
 behaviourPath = '/media/jamesrowland/DATA/RawData/Behaviour/2018/';
 
-savePathBehav = '/home/jamesrowland/Documents/ProcessedData/behaviour_test/';
-savePathIm = '/home/jamesrowland/Documents/ProcessedData/test_pipeline/';
+savePathBehav = '/media/jamesrowland/DATA/ProcessedData/behaviour/';
+savePathIm = '/media/jamesrowland/DATA/ProcessedData/full_structures/';
 
 
 % get the appropriate file paths

@@ -102,9 +102,9 @@ for i = 1:length(allMats)
     dateStr = ['date_' date];
 
     % get the frame rate
-    %fRate = dat.ops.imageRate;
+    fRate = dat.ops.imageRate;
     
-    fRate =  30.05
+    %fRate =  30.05
     
     %divide the frame rate by the number of planes to get
     %the frame rate at individual frames

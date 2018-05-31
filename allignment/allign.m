@@ -50,8 +50,10 @@ for i = 1:length(bFields)
             
             iFields = fieldnames(imaging.(date).(areas{ii}));
         catch
-            error('likely cannot find imaging to match behaviour')
+            warning('likely cannot find imaging to match behaviour')
+            continue
         end
+        
         imSession = imaging.(date).(areas{ii}).(iFields{1});
         
         % get the frame rate of the imaging on each date in
@@ -133,11 +135,13 @@ for i = 1:length(bFields)
             % function
             
             sp = session.stim_position;
+            sps = [];
             for iiiii = 1:length(sp)
                 sps(iiiii) = str2double(sp{iiiii});
             end
 
             ss = session.stim_speed;
+            sss = [];
             for iiiii = 1:length(ss)
                 sss(iiiii) = str2double(ss{iiiii});
             end
