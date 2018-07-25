@@ -1,7 +1,9 @@
 function [imaging, behavStruct] = pipeline(mouse)
 
-% Pipeline to generate the structure containing all the information
-% (behaviour and imaging about a mouse.
+% Pipeline to generate the structure containing all 
+% behaviour and imaging information for a given mouse.
+
+% takes single argument - the mouse name of interest
 
 % Requires all matlab functions in the I-just-kohld-to-say-i-love-you repo
 
@@ -56,20 +58,7 @@ if iscell(imStruct) == 0
     imaging = timeSeries(imStruct, behavStruct);   
     % save the combined imaging and behaviour structure
     save([savePathIm mouse '.mat'], 'imaging', '-v7.3');
+else
+    imaging = [];
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

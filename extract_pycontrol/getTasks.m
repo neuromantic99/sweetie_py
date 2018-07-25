@@ -29,7 +29,6 @@ for i = 1:length(txts)
     
     outSession = {};
     
-    times = inSession.times;
     
     % add the info required for each task
     
@@ -46,11 +45,13 @@ for i = 1:length(txts)
     dateInf = split(inSession.date, ' ');
     date = datestr(dateInf{1}, 'yyyy-mm-dd');
     
-        
+    
+    
+    % have another task called sens_stim_baseline which needs the same info
+    % as normal sensory stimulation
     if strcmp(inSession.task, 'sens_stim_baseline')
         inSession.task = 'sensory_stimulation';
     end
-    
     
     outSession.ID = ID;
     outSession.date = date;
@@ -62,17 +63,25 @@ for i = 1:length(txts)
     
     % add the important info to extract for the sensory stim task
     if strcmp(inSession.task, 'sensory_stimulation')
+        taskStruct = getSensoryStim(inSession);
         
-        outSession.motor_start = times.motor_forward;
-        outSession.motor_atWhisk = times.stim_interval;
-        outSession.motor_back = times.motor_backward;
-        outSession.motor_atOrigin = times.trial_start;
-        
-        [stim_position, stim_speed] = getStimulusInfo(inSession);
-        outSession.stim_position = stim_position;
-        outSession.stim_speed = stim_speed;
-        
+    taskStruct = {};
+    % add the important info for position discrimination task
+    elseif strcmp(inSession.task, 'pd_1') || strcmp(inSession.task, 'pd_2')
+        taskStruct = getPD(inSession);
     end
+    
+    tfNames = fieldnames(taskStruct);
+    
+    % append the task information to the final behavioural structure
+    for i = 1:length(tfNames)
+        tfn = tfNames{i};
+        outSession.(tfn) = taskStruct.(tfn);
+    end
+            
+    
+    
+    
     
     allSessions{end+1} = outSession;
     
