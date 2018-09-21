@@ -2,7 +2,6 @@ function times_struct = getTimes(lines)
 
 times_struct = {};
 
-
 % get a cell containing all the events and their corresponding numbers
 for i = 1:length(lines)
     l = lines{i};
@@ -24,8 +23,7 @@ for ti = times_info
     
     % a list of the times a state or event occured
     times_list = [];
-    
-    
+   
     % get the names of each event and format them as valid fieldnames
     % removing spaces and quote marks
     tisp = strsplit(ti{:}, ':');
@@ -38,7 +36,10 @@ for ti = times_info
     % loop through each line to look for event times for each evetn
     for i = 1:length(lines)
         l = lines{i};
-        if ~isempty(l) && strcmp(l(1), 'D')
+        
+        % the first logical here is for speed, incorrect events will often
+        % break through this, but filters so not all lines need to be split
+        if ~isempty(l) && strcmp(l(end), times_num(end)) && strcmp(l(1), 'D') 
             
             % split the event lines. ind 3 is the event number, ind 2 is the
             % time

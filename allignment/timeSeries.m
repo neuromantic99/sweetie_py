@@ -10,7 +10,7 @@ bFields = fieldnames(behaviour);
 behavNames = {};
 c = 0;
 for i = 1:length(bFields)  
-    if contains(bFields{i},'sensory') || contains(bFields{i}, 'imaging_')  || contains(bFields{i}, 'havpc')     
+    if contains(bFields{i},'sensory') || contains(bFields{i}, 'imaging_')  || contains(bFields{i}, 'havpc') || contains(bFields{i}, 'pd_2')     
         c = c +1;
         behavNames{c} = bFields{i};
     end
@@ -20,12 +20,6 @@ end
 % if all the behaviours are not showing up, this is most likely the problem
 for i = 1:length(behavNames)
     imaging = allign(behaviour, imaging, behavNames{i});
-end
-
-% use this to break the function is tbt is not required
-% or behaviour does not have motor information
-if contains(bFields{i}, 'havpc') 
-    return
 end
 
 dates = fieldnames(imaging);
@@ -66,22 +60,11 @@ for i = 1:length(dates)
         % timings of the trial
         
         if isfield(behav, 'correct_trials')
-            ct = dupMat(behav.correct_trials, 'correct');
-            mt = dupMat(behav.missed_trials, 'missed');
-            fp = dupMat(behav.falsepositive_trials, 'falsePositive');
-            cr = dupMat(behav.correctrejection_trials,'correctRejection');
-            it = dupMat(behav.initial_trials, 'initial');
-            
-            allTrials = horzcat(ct,mt,fp,cr,it);
-            
-            % sort all trials by their timings
-            [~, idx] = sort(cell2mat(allTrials(1,:)));
-            allTrials = allTrials(:,idx);
-            
             % append the trial type information to the imaging behaviour
             % structure
             imaging.(date).(area).(behavName{1}).trialType = string(allTrials(2,:));
         end
+        
         
         
         % the start of the trial (in frames) indicted by the start of the motor
@@ -169,6 +152,7 @@ for i = 1:length(dates)
             imaging.(date).(area).(plane).trialByTrialSpikes = tBtSt;
             imaging.(date).(area).(plane).trialByTrialAmps = tBtAmps;
             imaging.(date).(area).(plane).info = comment;
+            
             
         end
     end

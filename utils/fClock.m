@@ -1,4 +1,7 @@
-fPath = '/media/jamesrowland/DATA/RawData/Behaviour/2018/CTBD1.1j_area01_frameclock.txt';
+clear all
+close all
+
+fPath = '/Users/mariangelapanniello/Desktop/behav_data/microscope/raw/CTBD6.3h/20180727/frameclock-area01.txt';
 fc = load(fPath);
 
 for i = 1:length(fc)-1
@@ -12,10 +15,10 @@ idx = find(diff>100000 | diff < 0);
 diff(idx) = [];
 
 close all
-figure
-plot(diff,'.')
+figure(2)
+plot(diff)
 
 md = mean(diff) / 1000;
 
-
 fRate = 1000 / md;
+

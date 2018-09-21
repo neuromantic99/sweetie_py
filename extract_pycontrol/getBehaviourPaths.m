@@ -39,8 +39,3 @@ for i = 1:length(mouseTxts)
     end 
 end
     
-
-
-
-
-

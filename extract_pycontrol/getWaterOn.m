@@ -10,4 +10,3 @@ for i = 1:length(pl)
         waterOn(end+1) = str2double(ss{2});
     end
 end
-        %waterOn(end+1) = pl(

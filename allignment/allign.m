@@ -152,6 +152,9 @@ for i = 1:length(bFields)
             session.stim_position = sps;
         end
         
+        %need to recocatenate trials after alignment
+        session.trial_type = concatTrials(session);
+        
         imaging.(date).(areas{ii}).session_behaviour = session;
 
         

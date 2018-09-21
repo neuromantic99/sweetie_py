@@ -29,10 +29,11 @@ for i = 1:length(allSessions)
     end
     
     % get the area number and take out '0' so it matches with imaging
-    
-    if length(session.area) ~= 0
-        area = session.area;
-        area = erase(area,'0');
+    % correct for a01 etc
+    if ~isempty(session.area)
+        
+        % this breaks at area10
+        area = strcat('area', session.area(end));
         
         % filthy way of adding the area field to imaging behaviour only
         tempStruct.(date).(area) = behavStruct.(task).(date);
@@ -41,8 +42,4 @@ for i = 1:length(allSessions)
     
 end
 
-
-
 end
-
-

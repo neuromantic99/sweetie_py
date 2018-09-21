@@ -1,9 +1,7 @@
 function [imaging, behavStruct] = pipeline(mouse)
 
-% Pipeline to generate the structure containing all 
-% behaviour and imaging information for a given mouse.
-
-% takes single argument - the mouse name of interest
+% Pipeline to generate the structure containing all the information
+% (behaviour and imaging about a mouse.
 
 % Requires all matlab functions in the I-just-kohld-to-say-i-love-you repo
 
@@ -27,13 +25,13 @@ function [imaging, behavStruct] = pipeline(mouse)
 % all of these paths must end with a '/' this can be responsible for
 % a variety of errors
 
+fclose all;
 
-imagingPath = '/media/jamesrowland/DATA/ProcessedData/procs/';
-behaviourPath = '/media/jamesrowland/DATA/RawData/Behaviour/2018/';
+imagingPath = 'C:\Users\Curtis-E-Bear\Desktop\data\imaging\';
+behaviourPath = 'C:\Users\Curtis-E-Bear\Desktop\data\organised_behaviour\';
 
-savePathBehav = '/media/jamesrowland/DATA/ProcessedData/behaviour/';
-savePathIm = '/media/jamesrowland/DATA/ProcessedData/full_structures/';
-
+savePathBehav = 'C:\Users\Curtis-E-Bear\Desktop\data\processed\behaviour\';
+savePathIm = 'C:\Users\Curtis-E-Bear\Desktop\data\processed\imaging\';
 
 % get the appropriate file paths
 [txts, pcas] = getBehaviourPaths(behaviourPath, mouse);
@@ -54,7 +52,7 @@ imStruct = imagingParser(imagingPath, mouse);
 
 % shift the imaging behaviour into the imaging structure, allign to the
 % behaviour and generate time series trial by trial data.
-if iscell(imStruct) == 0
+if ~iscell(imStruct)
     imaging = timeSeries(imStruct, behavStruct);   
     % save the combined imaging and behaviour structure
     save([savePathIm mouse '.mat'], 'imaging', '-v7.3');
